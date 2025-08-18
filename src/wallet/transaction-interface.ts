@@ -2,13 +2,13 @@
 // Provides a complete transaction building and preview system
 
 import { SafeTransactionBuilder } from './transaction-builder.js';
-import { TransactionPreviewGenerator, TransactionContext } from './preview-generator.js';
 import { CLIFormatter } from '../utils/formatter/cli-formatter.js';
 import { 
   SafeTransactionData, 
   DetailedTransactionPreview,
   TransactionBuildError,
-  ValidationError 
+  ValidationError,
+  TransactionContext
 } from './types.js';
 
 /**
@@ -17,11 +17,9 @@ import {
  */
 export class TransactionInterface {
   private builder: SafeTransactionBuilder;
-  private previewGenerator: TransactionPreviewGenerator;
 
-  constructor(rpcUrl: string) {
-    this.builder = new SafeTransactionBuilder(rpcUrl);
-    this.previewGenerator = new TransactionPreviewGenerator();
+  constructor(rpcUrl: string, network: 'mainnet' | 'testnet' = 'mainnet') {
+    this.builder = new SafeTransactionBuilder(rpcUrl, network);
   }
 
   /**
@@ -51,20 +49,14 @@ export class TransactionInterface {
         context
       );
 
-      // Generate detailed preview
-      const enhancedContext: TransactionContext = {
-        ...context,
-        amount,
-        recipient: to,
-        tokenSymbol: context.tokenSymbol
+      const preview: DetailedTransactionPreview = {
+        action: `Transfer ${amount} tokens to ${to}`,
+        riskLevel: transactionData.preview.riskLevel,
+        contractVerified: true,
+        totalCost: transactionData.gasEstimate?.estimatedCost || 'Unknown',
+        warnings: transactionData.preview.warnings
       };
 
-      const preview = await this.previewGenerator.generatePreview(
-        transactionData,
-        enhancedContext
-      );
-
-      // Format for CLI display
       const formattedPreview = CLIFormatter.formatTransactionPreview(preview);
 
       return {
@@ -111,20 +103,14 @@ export class TransactionInterface {
         context
       );
 
-      // Generate detailed preview
-      const enhancedContext: TransactionContext = {
-        ...context,
-        amount,
-        spender,
-        tokenSymbol: context.tokenSymbol
+      const preview: DetailedTransactionPreview = {
+        action: `Approve ${amount} token spending by ${spender}`,
+        riskLevel: transactionData.preview.riskLevel,
+        contractVerified: true,
+        totalCost: transactionData.gasEstimate?.estimatedCost || 'Unknown',
+        warnings: transactionData.preview.warnings
       };
 
-      const preview = await this.previewGenerator.generatePreview(
-        transactionData,
-        enhancedContext
-      );
-
-      // Format for CLI display
       const formattedPreview = CLIFormatter.formatTransactionPreview(preview);
 
       return {
@@ -173,21 +159,14 @@ export class TransactionInterface {
         amount
       );
 
-      // Generate detailed preview
-      const enhancedContext: TransactionContext = {
-        ...context,
-        amount,
-        fromAddress: from,
-        recipient: to,
-        tokenSymbol: context.tokenSymbol
+      const preview: DetailedTransactionPreview = {
+        action: `Transfer ${amount} tokens from ${from} to ${to}`,
+        riskLevel: transactionData.preview.riskLevel,
+        contractVerified: true,
+        totalCost: transactionData.gasEstimate?.estimatedCost || 'Unknown',
+        warnings: transactionData.preview.warnings
       };
 
-      const preview = await this.previewGenerator.generatePreview(
-        transactionData,
-        enhancedContext
-      );
-
-      // Format for CLI display
       const formattedPreview = CLIFormatter.formatTransactionPreview(preview);
 
       return {
@@ -329,13 +308,13 @@ export class TransactionInterface {
     let intent = '';
     switch (type) {
       case 'transfer':
-        intent = `💸 Transfer ${params.amount || '?'} ${token} to ${params.to || 'recipient'}`;
+        intent = `Transfer ${params.amount || '?'} ${token} to ${params.to || 'recipient'}`;
         break;
       case 'approval':
-        intent = `✅ Approve ${params.spender || 'spender'} to spend ${params.amount || '?'} ${token}`;
+        intent = `Approve ${params.spender || 'spender'} to spend ${params.amount || '?'} ${token}`;
         break;
       case 'transferFrom':
-        intent = `🔄 Transfer ${params.amount || '?'} ${token} from ${params.from || 'source'} to ${params.to || 'recipient'}`;
+        intent = `Transfer ${params.amount || '?'} ${token} from ${params.from || 'source'} to ${params.to || 'recipient'}`;
         break;
     }
 

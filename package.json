@@ -1,7 +1,7 @@
 {
   "name": "orbitl",
   "version": "1.0.0",
-  "description": "Natural language interface for Sei smart contract interaction",
+  "description": "Natural language interface for Sei contract interaction",
   "type": "module",
   "main": "dist/cli.js",
   "bin": {
@@ -11,17 +11,14 @@
     "dev": "tsx src/cli.ts",
     "build": "tsc",
     "start": "node dist/cli.js",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:watch": "vitest --watch"
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "keywords": [
     "sei",
     "blockchain",
     "cli",
     "mcp",
-    "smart-contracts"
+    "contracts"
   ],
   "author": "",
   "license": "MIT",
@@ -51,7 +48,6 @@
     "prettier": "^3.6.2",
     "tsx": "^4.20.4",
     "typescript": "^5.9.2",
-    "@types/qrcode-terminal": "^0.12.2",
-    "vitest": "^2.1.9"
+    "@types/qrcode-terminal": "^0.12.2"
   }
 }

@@ -41,30 +41,11 @@ export interface TransactionPreview {
  * Used for comprehensive transaction analysis and display
  */
 export interface DetailedTransactionPreview {
-  // Basic info
-  title: string;                        // "Token Transfer"
-  humanDescription: string;             // "Transfer 100 USDC to Alice"
-  
-  // Contract details
-  contractName: string;                 // "USD Coin (USDC)"
-  contractAddress: string;              // "0x123..."
-  contractVerified: boolean;            // true/false
-  
-  // Transaction details
   action: string;                       // "transfer", "approve", "swap"
-  parameters: PreviewParameter[];       // Structured parameter display
-  
-  // Risk assessment
   riskLevel: RiskLevel;                 // 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
-  riskFactors: string[];                // ["Large approval amount"]
-  safetyWarnings: string[];             // ["This approves unlimited spending"]
-  
-  // Cost information
-  gasEstimate: GasEstimate;             // Detailed gas cost estimation
+  contractVerified: boolean;            // true/false
   totalCost: string;                    // "$0.52 total cost"
-  
-  // User confirmations needed
-  confirmations: UserConfirmation[];    // Required user acknowledgments
+  warnings?: string[];                  // Safety warnings for the user
 }
 
 /**

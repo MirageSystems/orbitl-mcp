@@ -29,7 +29,7 @@ export interface SimulationResult {
 }
 
 /**
- * Simple transaction simulator
+ * Transaction simulator
  * Shows exactly what will happen before user signs
  */
 export class TransactionSimulator {
@@ -51,7 +51,7 @@ export class TransactionSimulator {
     decimals: number = 18
   ): Promise<SimulationResult> {
     
-    console.log(`🔍 Simulating transfer: ${amount} ${tokenSymbol} from ${fromAddress} to ${toAddress}`);
+    console.log(`Simulating transfer: ${amount} ${tokenSymbol} from ${fromAddress} to ${toAddress}`);
     
     // Get current balances
     const senderBalance = await this.balanceFetcher.getTokenBalance(
@@ -112,7 +112,7 @@ export class TransactionSimulator {
     tokenSymbol: string = 'TOKEN'
   ): Promise<SimulationResult> {
     
-    console.log(`🔍 Simulating approval: ${amount} ${tokenSymbol} to ${spenderAddress}`);
+    console.log(`Simulating approval: ${amount} ${tokenSymbol} to ${spenderAddress}`);
     
     // Get current balance (no balance change for approvals)
     const ownerBalance = await this.balanceFetcher.getTokenBalance(
@@ -152,19 +152,19 @@ export class TransactionSimulator {
 
     // Check if sender has enough balance
     if (transferAmount > senderBalance.current) {
-      warnings.push('⚠️ Insufficient balance - transaction will fail');
+      warnings.push('Insufficient balance - transaction will fail');
       riskLevel = 'CRITICAL';
     }
 
     // Check for zero address
     if (toAddress === '0x0000000000000000000000000000000000000000') {
-      warnings.push('🔥 Sending to burn address - tokens will be lost forever');
+      warnings.push('Sending to burn address - tokens will be lost forever');
       riskLevel = 'CRITICAL';
     }
 
     // Check for very large amounts (>50% of balance)
     if (transferAmount > (senderBalance.current / BigInt(2))) {
-      warnings.push('💰 Transferring large portion of balance');
+      warnings.push('Transferring large portion of balance');
       riskLevel = riskLevel === 'LOW' ? 'MEDIUM' : riskLevel;
     }
 
@@ -186,14 +186,14 @@ export class TransactionSimulator {
                        amount === ethers.MaxUint256.toString();
 
     if (isUnlimited) {
-      warnings.push('⚠️ UNLIMITED APPROVAL - Spender can take ALL your tokens');
-      warnings.push('💡 Consider approving only what you need');
+      warnings.push('UNLIMITED APPROVAL - Spender can take ALL your tokens');
+      warnings.push('Consider approving only what you need');
       riskLevel = 'HIGH';
     }
 
     // Check for suspicious spender patterns
     if (spenderAddress === '0x0000000000000000000000000000000000000000') {
-      warnings.push('❌ Approving zero address - this will fail');
+      warnings.push('Approving zero address - this will fail');
       riskLevel = 'CRITICAL';
     }
 
@@ -206,31 +206,26 @@ export class TransactionSimulator {
   static formatSimulation(simulation: SimulationResult): string {
     const { riskLevel, warnings } = simulation;
     
-    // Risk level color
-    const riskColor = riskLevel === 'LOW' ? '🟢' : 
-                     riskLevel === 'MEDIUM' ? '🟡' : 
-                     riskLevel === 'HIGH' ? '🟠' : '🔴';
-    
-    let output = `\n📊 Transaction Simulation\n`;
-    output += `${riskColor} ${simulation.summary}\n\n`;
+    let output = `\nTransaction Simulation\n`;
+    output += `[${riskLevel}] ${simulation.summary}\n\n`;
     
     // Balance changes
     if (simulation.transactionType === 'transfer') {
-      output += `💸 Your Balance: ${simulation.senderBefore} → ${simulation.senderAfter}\n`;
-      output += `📨 Recipient: ${simulation.recipientBefore} → ${simulation.recipientAfter}\n`;
+      output += `Your Balance: ${simulation.senderBefore} → ${simulation.senderAfter}\n`;
+      output += `Recipient: ${simulation.recipientBefore} → ${simulation.recipientAfter}\n`;
     } else {
-      output += `💰 Your Balance: ${simulation.senderAfter}\n`;
+      output += `Your Balance: ${simulation.senderAfter}\n`;
     }
     
-    output += `⛽ Gas Cost: ${simulation.gasCostETH}\n`;
+    output += `Gas Cost: ${simulation.gasCostETH}\n`;
     
     // Warnings
     if (warnings.length > 0) {
-      output += `\n⚠️ Warnings:\n`;
+      output += `\nWarnings:\n`;
       warnings.forEach(warning => output += `  ${warning}\n`);
     }
     
-    output += `\n🔒 Orbitl NEVER handles your private keys\n`;
+    output += `\nOrbitl NEVER handles your private keys\n`;
     
     return output;
   }

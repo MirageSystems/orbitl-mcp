@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @fileoverview Orbitl - Smart Contract AI Assistant for Sei Network
+ * @fileoverview Orbitl - Contract AI Assistant for Sei Network
  * Main CLI entry point with chat-first interface and MCP integration
  * @author Orbitl Team
  */
@@ -28,7 +28,7 @@ const program = new Command();
 // CLI Setup
 program
   .name("orbitl")
-  .description("🤖 Smart Contract AI Assistant for Sei Network with recursive tool calling")
+  .description("🤖 Contract AI Assistant for Sei Network with recursive tool calling")
   .version("1.0.0")
   .option('-n, --network <network>', 'Network to use (mainnet|testnet)', 'mainnet')
   .option('-c, --continue', 'Continue previous conversation')
@@ -265,7 +265,7 @@ program.action(async (options) => {
 program
   .command("analyze")
   .alias("a")
-  .description("Analyze a smart contract (non-interactive)")
+  .description("Analyze a contract (non-interactive)")
   .argument("<address>", "Contract address to analyze")
   .option("-d, --detailed", "Show detailed function list")
   .action(async (address: string, options: { detailed?: boolean }, command: Command) => {
@@ -297,7 +297,7 @@ program
         if (error.message.includes("Invalid address")) {
           log.warn(chalk.yellow("\n💡 Make sure the address is in format: 0x1234..."));
         } else if (error.message.includes("not a contract")) {
-          log.warn(chalk.yellow("\n💡 This address doesn't contain a smart contract"));
+          log.warn(chalk.yellow("\n💡 This address doesn't contain a contract"));
         } else if (error.message.includes("Network connection")) {
           log.warn(chalk.yellow("\n💡 Check your internet connection and try again"));
         }

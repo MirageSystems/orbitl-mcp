@@ -3,4 +3,4 @@
  */
 
 export { default as log } from './logger.js';
-export * from './formatter/index.js';
+export { CLIFormatter } from './formatter/cli-formatter.js';

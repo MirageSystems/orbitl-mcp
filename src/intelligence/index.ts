@@ -3,4 +3,4 @@
  */
 
 export { AIClient, validateAICredentials } from './client.js';
-export { setupContractTools } from './tool-manager.js';
+export { setupAllTools } from './tools/index.js';

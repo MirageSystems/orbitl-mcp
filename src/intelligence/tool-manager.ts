@@ -43,7 +43,7 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
   // ============================================
   ai.registerTool(
     'analyze_contract',
-    'Analyze a smart contract on Sei Network to understand its type, functions, verification status, and safety',
+    'Analyze a contract on Sei Network to understand its type, functions, verification status, and safety',
     {
       type: 'object',
       properties: {
@@ -100,7 +100,7 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
   // ============================================
   ai.registerTool(
     'get_function_details',
-    'Get detailed information about a specific function in a smart contract',
+    'Get detailed information about a specific function in a contract',
     {
       type: 'object',
       properties: {
@@ -243,46 +243,28 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
       required: ['symbol']
     },
     async (args: { symbol: string }) => {
-      // Import TokenInfo dynamically to avoid circular deps
-      const { TokenInfo } = await import('../wallet/token-info.js');
+      // Use centralized token resolver
+      const { getTokenResolver } = await import('../config/token-resolver.js');
       
-      const knownTokens = {
-        'USDC': '0xa0b86a33e6441d82f6f7f8e0dc7f2a5e9b9e2c3a',
-        'WSEI': '0x742d35cc6665cb9d9dc69e7a1e15f2fc0c9a3456',
-        'USDT': '0xa0b1c2d3e4f5a0b1c2d3e4f5a0b1c2d3e4f5a0b1'
-      };
-
-      const upperSymbol = args.symbol.toUpperCase();
-      const address = knownTokens[upperSymbol as keyof typeof knownTokens];
-
-      if (!address) {
-        return {
-          found: false,
-          symbol: upperSymbol,
-          error: `Token ${upperSymbol} not found in registry`,
-          availableTokens: Object.keys(knownTokens),
-          suggestion: `Available tokens: ${Object.keys(knownTokens).join(', ')}`
-        };
-      }
-
+      const resolver = getTokenResolver('mainnet'); // Default to mainnet for lookup
+      
       try {
-        const metadata = await TokenInfo.getTokenMetadata(address);
+        const token = await resolver.resolveToken(args.symbol);
         return {
           found: true,
-          symbol: upperSymbol,
-          address,
-          name: metadata.name,
-          decimals: metadata.decimals,
-          fullName: `${metadata.name} (${metadata.symbol})`
+          symbol: args.symbol.toUpperCase(),
+          address: token.address,
+          name: token.name,
+          decimals: token.decimals,
+          fullName: `${token.name} (${token.symbol})`
         };
       } catch (error) {
         return {
-          found: true,
-          symbol: upperSymbol,
-          address,
-          name: `${upperSymbol} Token`,
-          decimals: upperSymbol === 'USDC' || upperSymbol === 'USDT' ? 6 : 18,
-          note: 'Metadata from registry (contract call failed)'
+          found: false,
+          symbol: args.symbol.toUpperCase(),
+          error: error instanceof Error ? error.message : 'Token not found',
+          availableTokens: resolver.getAvailableTokens(),
+          suggestion: `Available tokens: ${resolver.getAvailableTokens().join(', ')}`
         };
       }
     }
@@ -351,7 +333,7 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
           preview: result.preview,
           formattedPreview: result.formattedPreview,
           network: args.network || network,
-          securityNote: '🔒 Orbitl NEVER handles private keys. You sign with YOUR wallet.',
+          securityNote: 'Orbitl NEVER handles private keys. You sign with YOUR wallet.',
           instructions: [
             '1. Review the transaction preview above carefully',
             '2. Connect your wallet (we\'ll help with that)',
@@ -446,9 +428,9 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
           formattedPreview: result.formattedPreview,
           network: args.network || network,
           riskWarning: args.amount.toLowerCase().includes('unlimited') ? 
-            '⚠️ UNLIMITED APPROVAL: This allows the spender to take ALL of your tokens at any time!' : 
+            'UNLIMITED APPROVAL: This allows the spender to take ALL of your tokens at any time!' : 
             undefined,
-          securityNote: '🔒 Orbitl NEVER handles private keys. You sign with YOUR wallet.',
+          securityNote: 'Orbitl NEVER handles private keys. You sign with YOUR wallet.',
           instructions: [
             '1. Review the transaction preview and warnings above',
             '2. Consider using specific amounts instead of unlimited approvals',
@@ -544,8 +526,8 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
           preview: result.preview,
           formattedPreview: result.formattedPreview,
           network: args.network || network,
-          allowanceWarning: '⚠️ This transaction requires existing token allowance from the source address',
-          securityNote: '🔒 Orbitl NEVER handles private keys. You sign with YOUR wallet.',
+          allowanceWarning: 'This transaction requires existing token allowance from the source address',
+          securityNote: 'Orbitl NEVER handles private keys. You sign with YOUR wallet.',
           instructions: [
             '1. Ensure you have permission to spend from the source address',
             '2. Review the transaction preview above',
@@ -662,20 +644,20 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
           connectionUri: uri,
           qrCodeData,
           instructions: [
-            '🔗 WalletConnect Session Ready',
+            'WalletConnect Session Ready',
             '',
-            '📱 Scan the QR code above with your mobile wallet app:',
+            'Scan the QR code above with your mobile wallet app:',
             '  • MetaMask Mobile',
             '  • Trust Wallet', 
             '  • Rainbow Wallet',
             '  • Any WalletConnect-compatible wallet',
             '',
-            '🔒 SECURITY: Orbitl NEVER sees your private keys!',
+            'SECURITY: Orbitl NEVER sees your private keys!',
             '   Your keys stay safely in YOUR wallet.',
             '',
-            '⏱️ Connection will timeout in 2 minutes if not accepted.'
+            'Connection will timeout in 2 minutes if not accepted.'
           ],
-          securityNote: '🛡️ WalletConnect is a secure protocol. Your private keys never leave your device.',
+          securityNote: 'WalletConnect is a secure protocol. Your private keys never leave your device.',
           networkInfo: {
             network: args.network || network,
             chainId: (args.network === 'testnet') ? '1328' : '1329',
@@ -719,7 +701,7 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
             'Make sure to scan the QR code with your mobile wallet',
             'Accept the connection request in your wallet app'
           ],
-          securityNote: '🔒 Orbitl NEVER stores wallet connection state with private keys'
+          securityNote: 'Orbitl NEVER stores wallet connection state with private keys'
         };
       } catch (error) {
         return {
@@ -771,11 +753,11 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
             contractVerified: preview.contractVerified
           },
           instructions: [
-            '📋 Review the transaction details above carefully',
-            '⚠️ Pay special attention to risk warnings',
-            '💰 Check the gas cost estimate', 
-            '🔒 Connect your wallet when ready to sign',
-            '❌ NEVER share your private keys with anyone!'
+            'Review the transaction details above carefully',
+            'Pay special attention to risk warnings',
+            'Check the gas cost estimate', 
+            'Connect your wallet when ready to sign',
+            'NEVER share your private keys with anyone!'
           ],
           nextSteps: [
             'If everything looks correct, use "connect_wallet" to establish connection',
@@ -859,7 +841,7 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
         const config = (args.network === 'testnet') ? SEI_TESTNET_CONFIG : SEI_MAINNET_CONFIG;
         const simulator = new TransactionSimulator(config.rpcUrl);
         
-        console.log(`🔍 Simulating ${args.type} transaction...`);
+        console.log(`Simulating ${args.type} transaction...`);
         
         let simulation;
         
@@ -891,14 +873,14 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
           network: args.network || network,
           nextSteps: simulation.riskLevel === 'CRITICAL' ? 
             [
-              '❌ DO NOT PROCEED - Critical risk detected',
-              '⚠️ Review warnings carefully',
-              '🔍 Double-check all addresses and amounts'
+              'DO NOT PROCEED - Critical risk detected',
+              'Review warnings carefully',
+              'Double-check all addresses and amounts'
             ] :
             [
-              '✅ Simulation complete - review results above',
-              '🔗 Use "execute_transaction" if ready to sign',
-              '🔒 Your keys stay in YOUR wallet'
+              'Simulation complete - review results above',
+              'Use "execute_transaction" if ready to sign',
+              'Your keys stay in YOUR wallet'
             ]
         };
         
@@ -941,7 +923,7 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
       try {
         const walletFlow = new WalletConnectFlow();
         
-        console.log('🚀 Starting transaction execution flow...');
+        console.log('Starting transaction execution flow...');
         
         // Execute complete flow (connect + send)
         const result = await walletFlow.executeTransaction(args.transactionData);
@@ -953,11 +935,11 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
             transactionHash: result.transactionHash,
             status: 'completed',
             summary: 'Transaction signed and submitted successfully!',
-            securityReminder: '🔒 Your private keys never left your wallet device',
+            securityReminder: 'Your private keys never left your wallet device',
             nextSteps: [
-              `🔗 Track transaction: ${result.transactionHash}`,
-              '⏱️ Wait for network confirmation (usually 1-2 minutes)',
-              '✅ Transaction will appear in your wallet history'
+              `Track transaction: ${result.transactionHash}`,
+              'Wait for network confirmation (usually 1-2 minutes)',
+              'Transaction will appear in your wallet history'
             ]
           };
         } else {
@@ -1053,17 +1035,17 @@ function getFunctionWarnings(func: ABIFunction): string[] {
   const risk = assessRisk(func);
   
   if (risk === 'CRITICAL') {
-    warnings.push('⚠️ CRITICAL: This function can destroy the contract or steal funds');
+    warnings.push('CRITICAL: This function can destroy the contract or steal funds');
   } else if (risk === 'HIGH') {
-    warnings.push('⚠️ HIGH RISK: This function can transfer your assets');
+    warnings.push('HIGH RISK: This function can transfer your assets');
   }
   
   if (func.stateMutability === 'payable') {
-    warnings.push('💰 This function requires sending SEI tokens');
+    warnings.push('This function requires sending SEI tokens');
   }
   
   if (func.name.toLowerCase().includes('approve')) {
-    warnings.push('🔓 Approval functions can allow unlimited spending - be careful with amounts');
+    warnings.push('Approval functions can allow unlimited spending - be careful with amounts');
   }
   
   return warnings;
@@ -1120,21 +1102,21 @@ function getContractRisks(analysis: ContractData): string[] {
   const risks: string[] = [];
   
   if (!analysis.isVerified) {
-    risks.push('❌ Contract source code is not verified - high risk');
+    risks.push('Contract source code is not verified - high risk');
   }
   
   const criticalFuncs = analysis.abi.filter(f => assessRisk(f) === 'CRITICAL');
   if (criticalFuncs.length > 0) {
-    risks.push(`⚠️ Contains ${criticalFuncs.length} critical risk function(s)`);
+    risks.push(`Contains ${criticalFuncs.length} critical risk function(s)`);
   }
   
   const payableFuncs = analysis.abi.filter(f => f.stateMutability === 'payable');
   if (payableFuncs.length > 5) {
-    risks.push('💰 Many functions require sending funds - review carefully');
+    risks.push('Many functions require sending funds - review carefully');
   }
   
   if (analysis.basicType === 'Unknown') {
-    risks.push('❓ Unknown contract type - purpose unclear');
+    risks.push('Unknown contract type - purpose unclear');
   }
   
   return risks;

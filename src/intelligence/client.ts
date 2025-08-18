@@ -52,7 +52,11 @@ export class AIClient {
   }
 
   /**
-   * Register a tool with its implementation - clean and direct
+   * Register a tool with its implementation for AI function calling
+   * @param name - Unique tool name (e.g., 'analyze_contract')
+   * @param description - Human-readable description of what the tool does
+   * @param parameters - JSON Schema defining the tool's parameters
+   * @param implementation - Function that executes the tool logic
    */
   registerTool(
     name: string,
@@ -70,11 +74,14 @@ export class AIClient {
     // Register implementation
     this.toolImplementations.set(name, implementation);
     
-    log.info(`🔧 Registered tool: ${chalk.cyan(name)}`);
+    log.info(`Registered tool: ${chalk.cyan(name)}`);
   }
 
   /**
    * Chat with automatic tool calling and chaining
+   * @param messages - Conversation history as AI messages
+   * @param recursionDepth - Current recursion level (used to prevent infinite loops)
+   * @returns AI response after processing any tool calls
    */
   async chat(messages: AIMessage[], recursionDepth: number = 0): Promise<string> {
     const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/ai/run/${this.modelName}`;
@@ -113,11 +120,11 @@ export class AIClient {
       
       // Check if the model wants to use tools
       if (result.result.tool_calls && result.result.tool_calls.length > 0) {
-        console.log(`\\n🔧 AI is calling ${result.result.tool_calls.length} tool(s):`);
+        console.log(`\\nAI is calling ${result.result.tool_calls.length} tool(s):`);
         result.result.tool_calls.forEach((call, index) => {
           console.log(`  ${index + 1}. ${call.name} with args:`, JSON.stringify(call.arguments, null, 2));
         });
-        log.info(`\\n🔧 AI is calling ${result.result.tool_calls.length} tool(s):`);
+        log.info(`\\nAI is calling ${result.result.tool_calls.length} tool(s):`);
         
         // Execute all tool calls
         const toolResults = await this.executeToolCalls(result.result.tool_calls);
@@ -136,7 +143,7 @@ export class AIClient {
           content: `I executed the following tools:\n\n${toolSummary}\n\nNow I will analyze these results and provide you with a helpful response.`
         });
         
-        log.info(`🔄 Getting AI's analysis of tool results...\\n`);
+        log.info(`Getting AI's analysis of tool results...\\n`);
         
         // Recursion limit to prevent infinite loops
         if (recursionDepth >= 3) {
@@ -175,7 +182,7 @@ export class AIClient {
           
           const result = await implementation(args);
           
-          log.info(`    ✅ Success`);
+          log.info(`    Success`);
           
           results.push({
             tool: toolCall.name,
@@ -184,7 +191,7 @@ export class AIClient {
           });
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-          log.error(`    ❌ Error: ${errorMsg}`);
+          log.error(`    Error: ${errorMsg}`);
           log.error('Tool execution failed', { tool: toolCall.name, error: errorMsg });
           
           results.push({
@@ -195,7 +202,7 @@ export class AIClient {
         }
       } else {
         const errorMsg = `Tool '${toolCall.name}' not registered`;
-        log.error(`    ❌ Tool not found: ${toolCall.name}`);
+        log.error(`    Tool not found: ${toolCall.name}`);
         log.error('Tool not registered', { tool: toolCall.name });
         
         results.push({

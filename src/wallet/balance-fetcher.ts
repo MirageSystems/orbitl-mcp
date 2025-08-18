@@ -1,4 +1,4 @@
-// Simple balance fetching for transaction simulation
+// Balance fetching for transaction simulation
 // Gets current token balances to show before/after states
 
 import { ethers } from 'ethers';
@@ -14,7 +14,7 @@ export interface BalanceInfo {
 }
 
 /**
- * Simple balance fetcher for transaction simulation
+ * Balance fetcher for transaction simulation
  * No caching, no complexity - just direct contract calls
  */
 export class BalanceFetcher {

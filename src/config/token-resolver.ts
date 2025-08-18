@@ -44,7 +44,7 @@ export class TokenResolver {
     
     if (networkTokens[upper as keyof typeof networkTokens]) {
       const token = networkTokens[upper as keyof typeof networkTokens] as TokenInfo;
-      console.log(`🔍 Found ${upper} on ${this.network}: ${token.address}`);
+      console.log(`Found ${upper} on ${this.network}: ${token.address}`);
       return token;
     }
     
@@ -67,13 +67,14 @@ export class TokenResolver {
     }
     
     // Case 3: Unknown symbol
-    console.log(chalk.yellow(`⚠️ Unknown token: ${input}`));
+    console.log(chalk.yellow(`Unknown token: ${input}`));
     console.log(chalk.gray(`Available tokens: ${this.getAvailableTokens().join(', ')}`));
     throw new Error(`Token ${input} not recognized. Use symbol (USDC, WSEI, SEI) or contract address.`);
   }
 
   /**
    * Get all available token symbols for current network
+   * @returns Array of token symbols (e.g., ['USDC', 'WSEI', 'SEI'])
    */
   getAvailableTokens(): string[] {
     return Object.keys(tokens[this.network]);
@@ -81,6 +82,8 @@ export class TokenResolver {
 
   /**
    * Get token info by symbol (no address verification)
+   * @param symbol - Token symbol to look up
+   * @returns TokenInfo object or null if not found
    */
   getTokenBySymbol(symbol: string): TokenInfo | null {
     const upper = symbol.toUpperCase();
@@ -90,6 +93,7 @@ export class TokenResolver {
 
   /**
    * Get current network
+   * @returns Current network (mainnet or testnet)
    */
   getNetwork(): NetworkType {
     return this.network;
@@ -97,6 +101,7 @@ export class TokenResolver {
 
   /**
    * Set network (for switching between mainnet/testnet)
+   * @param network - Target network to switch to
    */
   setNetwork(network: NetworkType): void {
     this.network = network;
@@ -104,6 +109,8 @@ export class TokenResolver {
 
   /**
    * Check if token exists by symbol
+   * @param symbol - Token symbol to check
+   * @returns True if token exists for current network
    */
   hasToken(symbol: string): boolean {
     const upper = symbol.toUpperCase();
@@ -136,8 +143,8 @@ export class TokenResolver {
    */
   private async warnIfScam(address: string): Promise<void> {
     if (TokenResolver.KNOWN_SCAMS.includes(address.toLowerCase())) {
-      console.log(chalk.red('🚨 WARNING: KNOWN SCAM TOKEN ADDRESS'));
-      console.log(chalk.red('🚨 DO NOT PROCEED WITH THIS TRANSACTION'));
+      console.log(chalk.red('WARNING: KNOWN SCAM TOKEN ADDRESS'));
+      console.log(chalk.red('DO NOT PROCEED WITH THIS TRANSACTION'));
       throw new Error('Scam token detected - transaction blocked for safety');
     }
   }

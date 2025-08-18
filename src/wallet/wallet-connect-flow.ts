@@ -1,4 +1,4 @@
-// Simple WalletConnect Flow Integration
+// WalletConnect Flow Integration
 // Shows QR → Wait → Send transaction flow
 
 import qrcode from 'qrcode-terminal';
@@ -14,7 +14,7 @@ export interface WalletFlowResult {
 }
 
 /**
- * Simple wallet connection and transaction flow
+ * Wallet connection and transaction flow
  * No complex state management - just QR → Connect → Send
  */
 export class WalletConnectFlow {

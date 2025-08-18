@@ -7,8 +7,10 @@ import { createInterface } from 'readline';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { AIClient, validateAICredentials, setupContractTools } from '../intelligence/index.js';
-import { log, CLIFormatter } from '../utils/index.js';
+import { AIClient, validateAICredentials } from '../intelligence/index.js';
+import { setupAllTools } from '../intelligence/tools/index.js';
+import { log } from '../utils/index.js';
+import { CLIFormatter } from '../utils/formatter/cli-formatter.js';
 
 export interface ChatOptions {
   network: 'mainnet' | 'testnet';
@@ -45,9 +47,9 @@ export class ChatInterface {
    * Initialize and start the chat
    */
   async start(): Promise<void> {
-    // Setup contract analysis tools
-    log.info('🚀 Initializing Orbitl with contract analysis tools...');
-    await setupContractTools(this.ai, this.options.network);
+    // Setup all AI tools by domain
+    log.info('🚀 Initializing Orbitl with AI tools...');
+    await setupAllTools(this.ai, this.options.network);
     
     // Show welcome message
     this.showWelcome();

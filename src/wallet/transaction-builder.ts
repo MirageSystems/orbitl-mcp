@@ -12,7 +12,7 @@ import {
   RiskLevel
 } from './types.js';
 import { ABIManager } from './abi-manager.js';
-import { TokenInfo } from './token-info.js';
+import { getTokenResolver } from '../config/token-resolver.js';
 import { TransactionValidator } from './validator.js';
 import { GasEstimator } from './gas-estimator.js';
 
@@ -25,12 +25,12 @@ import { GasEstimator } from './gas-estimator.js';
 export class SafeTransactionBuilder {
   private provider: ethers.JsonRpcProvider;
   private gasEstimator: GasEstimator;
+  private network: 'mainnet' | 'testnet';
 
-  constructor(rpcUrl: string) {
+  constructor(rpcUrl: string, network: 'mainnet' | 'testnet' = 'mainnet') {
     this.provider = new ethers.JsonRpcProvider(rpcUrl);
     this.gasEstimator = new GasEstimator(rpcUrl);
-    // Initialize TokenInfo with the same provider
-    TokenInfo.setProvider(rpcUrl);
+    this.network = network;
   }
 
   /**
@@ -47,7 +47,6 @@ export class SafeTransactionBuilder {
     context?: TransactionContext
   ): Promise<SafeTransactionData> {
     
-    // 1. Validate inputs using comprehensive validator
     const validation = TransactionValidator.validateTransferParams({
       tokenAddress,
       recipient: to,
@@ -63,21 +62,26 @@ export class SafeTransactionBuilder {
     }
 
     try {
-      // 2. Get token metadata for better formatting
-      const tokenMetadata = await TokenInfo.getTokenMetadata(tokenAddress);
+      const tokenResolver = getTokenResolver(this.network);
       
-      // 3. Validate amount against token decimals
-      const amountValidation = await TokenInfo.validateAmountForToken(amount, tokenAddress);
-      if (!amountValidation.isValid) {
+      // Get token info if available, otherwise use defaults
+      let tokenInfo: any;
+      try {
+        tokenInfo = await tokenResolver.resolveToken(tokenAddress);
+      } catch {
+        tokenInfo = { name: 'Unknown Token', symbol: 'UNKNOWN', decimals: 18 };
+      }
+      
+      // Basic amount validation
+      if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
         throw new TransactionBuildError(
-          amountValidation.error || 'Invalid amount',
+          'Invalid amount format',
           'INVALID_AMOUNT',
-          [`Use maximum ${amountValidation.maxDecimals} decimal places`]
+          ['Amount must be a positive number']
         );
       }
 
-      // 4. Convert amount to wei using correct decimals
-      const amountWei = await TokenInfo.toWei(amount, tokenAddress);
+      const amountWei = ethers.parseUnits(amount, tokenInfo.decimals || 18);
 
       // 5. Encode function call using ABI manager
       const abi = ABIManager.getERC20ABI();
@@ -98,11 +102,10 @@ export class SafeTransactionBuilder {
       transaction.gasLimit = gasEstimate.gasLimit;
       transaction.gasPrice = gasEstimate.gasPrice;
 
-      // 9. Create enhanced preview with token context
-      const formattedAmount = await TokenInfo.formatAmount(amount, tokenAddress, false);
+      const formattedAmount = `${amount} ${tokenInfo.symbol || 'tokens'}`;
       const preview: TransactionPreview = {
         humanDescription: `Transfer ${formattedAmount} to ${this.formatAddress(to)}`,
-        contractName: `${tokenMetadata.name} (${tokenMetadata.symbol})`,
+        contractName: `${tokenInfo.name} (${tokenInfo.symbol})`,
         riskLevel: 'LOW',
         warnings: validation.warnings,
         estimatedCost: gasEstimate.estimatedCost
@@ -143,7 +146,6 @@ export class SafeTransactionBuilder {
     context?: TransactionContext
   ): Promise<SafeTransactionData> {
 
-    // 1. Validate inputs using comprehensive validator
     const validation = TransactionValidator.validateApprovalParams({
       tokenAddress,
       spender,
@@ -159,10 +161,17 @@ export class SafeTransactionBuilder {
     }
 
     try {
-      // 2. Get token metadata for better formatting
-      const tokenMetadata = await TokenInfo.getTokenMetadata(tokenAddress);
+      const tokenResolver = getTokenResolver(this.network);
+      
+      // Get token info if available, otherwise use defaults
+      let tokenInfo: any;
+      try {
+        tokenInfo = await tokenResolver.resolveToken(tokenAddress);
+      } catch {
+        tokenInfo = { name: 'Unknown Token', symbol: 'UNKNOWN', decimals: 18 };
+      }
 
-      // 3. Handle unlimited vs specific approvals
+      // Handle unlimited vs specific approvals
       let amountWei: bigint;
       let isUnlimited = false;
       const unlimitedKeywords = ['unlimited', 'max', 'maximum'];
@@ -171,16 +180,14 @@ export class SafeTransactionBuilder {
         amountWei = ethers.MaxUint256;
         isUnlimited = true;
       } else {
-        // Validate amount against token decimals
-        const amountValidation = await TokenInfo.validateAmountForToken(amount, tokenAddress);
-        if (!amountValidation.isValid) {
+        if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
           throw new TransactionBuildError(
-            amountValidation.error || 'Invalid amount',
+            'Invalid amount format',
             'INVALID_AMOUNT',
-            [`Use maximum ${amountValidation.maxDecimals} decimal places`]
+            ['Amount must be a positive number']
           );
         }
-        amountWei = await TokenInfo.toWei(amount, tokenAddress);
+        amountWei = ethers.parseUnits(amount, tokenInfo.decimals || 18);
       }
 
       // 4. Encode function call using ABI manager
@@ -215,11 +222,11 @@ export class SafeTransactionBuilder {
       // 9. Create enhanced preview
       const displayAmount = isUnlimited ? 
         'unlimited' : 
-        await TokenInfo.formatAmount(amount, tokenAddress, false);
+        `${amount} ${tokenInfo.symbol || 'tokens'}`;
 
       const preview: TransactionPreview = {
         humanDescription: `Approve spending ${displayAmount} by ${this.formatAddress(spender)}`,
-        contractName: `${tokenMetadata.name} (${tokenMetadata.symbol})`,
+        contractName: `${tokenInfo.name} (${tokenInfo.symbol})`,
         riskLevel,
         warnings,
         estimatedCost: gasEstimate.estimatedCost
@@ -283,21 +290,25 @@ export class SafeTransactionBuilder {
     }
 
     try {
-      // 2. Get token metadata
-      const tokenMetadata = await TokenInfo.getTokenMetadata(tokenAddress);
+      const tokenResolver = getTokenResolver(this.network);
       
-      // 3. Validate amount format
-      const tokenAmountValidation = await TokenInfo.validateAmountForToken(amount, tokenAddress);
-      if (!tokenAmountValidation.isValid) {
+      // Get token info if available, otherwise use defaults
+      let tokenInfo: any;
+      try {
+        tokenInfo = await tokenResolver.resolveToken(tokenAddress);
+      } catch {
+        tokenInfo = { name: 'Unknown Token', symbol: 'UNKNOWN', decimals: 18 };
+      }
+      
+      if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
         throw new TransactionBuildError(
-          tokenAmountValidation.error || 'Invalid amount',
+          'Invalid amount format',
           'INVALID_AMOUNT',
-          [`Use maximum ${tokenAmountValidation.maxDecimals} decimal places`]
+          ['Amount must be a positive number']
         );
       }
 
-      // 4. Convert amount to wei
-      const amountWei = await TokenInfo.toWei(amount, tokenAddress);
+      const amountWei = ethers.parseUnits(amount, tokenInfo.decimals || 18);
 
       // 5. Encode function call
       const abi = ABIManager.getERC20ABI();
@@ -318,11 +329,10 @@ export class SafeTransactionBuilder {
       transaction.gasLimit = gasEstimate.gasLimit;
       transaction.gasPrice = gasEstimate.gasPrice;
 
-      // 9. Create preview
-      const formattedAmount = await TokenInfo.formatAmount(amount, tokenAddress, false);
+      const formattedAmount = `${amount} ${tokenInfo.symbol || 'tokens'}`;
       const preview: TransactionPreview = {
         humanDescription: `Transfer ${formattedAmount} from ${this.formatAddress(from)} to ${this.formatAddress(to)}`,
-        contractName: `${tokenMetadata.name} (${tokenMetadata.symbol})`,
+        contractName: `${tokenInfo.name} (${tokenInfo.symbol})`,
         riskLevel: 'MEDIUM', // transferFrom is riskier as it uses allowances
         warnings: [
           'This uses token allowance - ensure you have permission',

@@ -263,7 +263,7 @@ export const WALLETCONNECT_CONFIG = {
   projectId: "a5053152776b33257c03b8d693e55afa",
   metadata: {
     name: "Orbitl",
-    description: "Natural language interface for Sei smart contract interaction",
+    description: "Natural language interface for Sei contract interaction",
     url: "https://github.com/MirageSystems/orbitl-mcp/",
     icons: ["https://walletconnect.com/walletconnect-logo.png"] // nedds to be updated 
   }
