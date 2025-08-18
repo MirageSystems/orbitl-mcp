@@ -122,6 +122,7 @@ Desktop.ini
 # Temporary files
 *.tmp
 *.temp
+/temp/
 
 # Cache
 .cache/

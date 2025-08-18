@@ -7,9 +7,12 @@ import { Command } from "commander";
 import chalk from "chalk";
 import ora from "ora";
 import Table from "cli-table3";
+import qrcode from "qrcode-terminal";
 import { SeiProvider, SEI_TESTNET_CONFIG, SEI_MAINNET_CONFIG } from "../blockchain/sei-provider.js";
 import { ContractReader } from "../core/contract-reader.js";
 import { formatAddress } from "../types/contract.js";
+import { WalletConnect } from "../wallet/wallet-connect.js";
+import { WALLETCONNECT_CONFIG } from "../wallet/wallet-connect.js";
 import type { ContractData, ABIFunction } from "../types/contract.js";
 
 const program = new Command();
@@ -105,6 +108,84 @@ program
     } catch (error) {
       spinner.fail("Connection failed");
       console.error(chalk.red(`\n❌ ${error instanceof Error ? error.message : 'Unknown error'}`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * Connect Command - WalletConnect integration
+ */
+program
+  .command("connect")
+  .alias("w")
+  .description("Connect to a mobile wallet via WalletConnect")
+  .option("-t, --testnet", "Use Sei testnet (default is mainnet)")
+  .action(async (options: { testnet?: boolean }) => {
+    const spinner = ora("Initializing WalletConnect...").start();
+    
+    try {
+      const wallet = new WalletConnect(WALLETCONNECT_CONFIG);
+
+      // Initialize WalletConnect
+      await wallet.initialize();
+      spinner.text = "Generating connection QR code...";
+
+      // Generate connection URI
+      const { uri, qrCodeData } = await wallet.generateConnectionURI();
+      
+      spinner.succeed("QR code generated!");
+      
+      console.log(chalk.green("\n🔗 WalletConnect Session"));
+      console.log(chalk.bold("Scan this QR code with your mobile wallet:"));
+      
+      // Display QR code visually
+      qrcode.generate(uri, { small: true });
+      
+      console.log(chalk.yellow("\n📱 Or copy this URI to your wallet app:"));
+      console.log(chalk.cyan(uri));
+      
+      console.log(chalk.gray("\nWaiting for wallet connection..."));
+      
+      // Set up event listeners
+      let connected = false;
+      
+      wallet.on("session_connected", (session) => {
+        connected = true;
+        console.log(chalk.green("\n✅ Wallet Connected!"));
+        
+        const state = wallet.getConnectionState();
+        const table = new Table({
+          head: [chalk.cyan("Property"), chalk.cyan("Value")]
+        });
+        
+        table.push(
+          ["Account", state.account || "Unknown"],
+          ["Chain", `Sei ${options.testnet ? 'Testnet' : 'Mainnet'}`],
+          ["Status", chalk.green("Connected")]
+        );
+        
+        console.log("\n" + table.toString());
+        console.log(chalk.yellow("\n💡 You can now use wallet commands with --wallet flag"));
+        process.exit(0);
+      });
+      
+      wallet.on("error", (error) => {
+        console.error(chalk.red(`\n❌ Connection error: ${error.message}`));
+        process.exit(1);
+      });
+      
+      // Timeout after 2 minutes
+      setTimeout(() => {
+        if (!connected) {
+          console.log(chalk.yellow("\n⏱️  Connection timeout"));
+          console.log("Please try again or check your wallet app");
+          process.exit(0);
+        }
+      }, 120000);
+      
+    } catch (error) {
+      spinner.fail("Connection failed");
+      console.error(chalk.red(`\n❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`));
       process.exit(1);
     }
   });
