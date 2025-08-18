@@ -173,7 +173,7 @@ program
   .description('Hardware wallet operations (Ledger/Trezor)')
   .option('-t, --type <type>', 'Wallet type (ledger|trezor)')
   .option('-a, --action <action>', 'Action (connect|address|sign)', 'connect')
-  .action(async (options) => {
+  .action(async (options, cmd) => {
     const { HardwareWalletManager } = await import('./hardware/hardware.js');
     
     const manager = new HardwareWalletManager();
@@ -214,19 +214,73 @@ program
             }
           }
         }
+      } else if (options.action === 'address' && options.type) {
+        const spinner = ora(`Getting address from ${options.type}...`).start();
+        
+        try {
+          // Check if wallet is already connected
+          let wallet = manager.getWallet(options.type);
+          if (!wallet) {
+            // Attempt to connect the specific hardware wallet
+            spinner.text = `Connecting to ${options.type}...`;
+            const available = await manager.detectWallets();
+            if (!available.includes(options.type)) {
+              spinner.fail(`${options.type} wallet not detected or failed to connect`);
+              return;
+            }
+            wallet = manager.getWallet(options.type);
+            if (!wallet) {
+              spinner.fail(`Failed to initialize ${options.type} wallet`);
+              return;
+            }
+          }
+          
+          spinner.text = 'Retrieving address...';
+          const address = await wallet.getAddress("m/44'/60'/0'/0/0");
+          spinner.succeed(`${options.type} address retrieved successfully!`);
+          
+          console.log(chalk.green(`\n✅ ${options.type.toUpperCase()} Address:`));
+          console.log(chalk.cyan(address));
+        } catch (error) {
+          spinner.fail(`Address retrieval failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
       } else if (options.action === 'sign' && options.type) {
         const { SafeTransactionBuilder } = await import('./wallet/transaction-builder.js');
         const { getTokenResolver } = await import('./config/token-resolver.js');
         
         const spinner = ora(`Preparing transaction for ${options.type}...`).start();
         
-        const builder = new SafeTransactionBuilder('https://evm-rpc.sei-apis.com', 'mainnet');
-        const resolver = getTokenResolver('mainnet');
+        // Get network from global option
+        const network = (cmd.parent?.opts().network || 'mainnet') as 'mainnet' | 'testnet';
+        
+        // Get network config and derive RPC URL
+        const config = network === 'testnet' ? SEI_TESTNET_CONFIG : SEI_MAINNET_CONFIG;
+        const rpcUrl = config.rpcUrl;
+        
+        const builder = new SafeTransactionBuilder(rpcUrl, network);
+        const resolver = getTokenResolver(network);
         const usdc = await resolver.getTokenBySymbol('USDC');
         
         if (!usdc) {
           spinner.fail('USDC token not found');
           return;
+        }
+        
+        // Check if wallet is already connected
+        let wallet = manager.getWallet(options.type);
+        if (!wallet) {
+          // Attempt to connect the specific hardware wallet
+          spinner.text = `Connecting to ${options.type}...`;
+          const available = await manager.detectWallets();
+          if (!available.includes(options.type)) {
+            spinner.fail(`${options.type} wallet not detected or failed to connect`);
+            return;
+          }
+          wallet = manager.getWallet(options.type);
+          if (!wallet) {
+            spinner.fail(`Failed to initialize ${options.type} wallet`);
+            return;
+          }
         }
         
         const transaction = await builder.buildTransfer(
@@ -238,7 +292,7 @@ program
         spinner.text = 'Please confirm on device...';
         
         try {
-          const signedTx = await manager.signWithHardware(options.type as any, transaction.transaction);
+          const signedTx = await manager.signWithHardware(options.type as any, transaction.transaction, "m/44'/60'/0'/0/0", rpcUrl);
           spinner.succeed('Transaction signed successfully!');
           
           console.log(chalk.green('\n✅ Signed Transaction:'));

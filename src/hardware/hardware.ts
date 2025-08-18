@@ -70,7 +70,8 @@ async detectWallets(): Promise<WalletType[]> {
   async signWithHardware(
     type: WalletType,
     transaction: TransactionData,
-    path: string = "m/44'/60'/0'/0/0"
+    path: string = "m/44'/60'/0'/0/0",
+    rpcUrl: string = 'https://evm-rpc.sei-apis.com'
   ): Promise<string> {
     const wallet = this.getWallet(type);
     if (!wallet) {
@@ -79,7 +80,7 @@ async detectWallets(): Promise<WalletType[]> {
 
     // Derive sender from the hardware path and query nonce/chainId from RPC
     const fromAddress = await wallet.getAddress(path);
-    const provider = new ethers.JsonRpcProvider('https://evm-rpc.sei-apis.com');
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
     const nonce = await provider.getTransactionCount(fromAddress);
     const { chainId } = await provider.getNetwork();
 
@@ -90,14 +91,14 @@ async detectWallets(): Promise<WalletType[]> {
       gasLimit: transaction.gasLimit || '65000',
       gasPrice: transaction.gasPrice || '10000000000',
       nonce,
-      chainId
+      chainId: Number(chainId)
     };
 
     return await wallet.signTransaction(unsignedTx, path);
   }
 
-  private async getNonce(address: string): Promise<number> {
-    const provider = new ethers.JsonRpcProvider('https://evm-rpc.sei-apis.com');
+  private async getNonce(address: string, rpcUrl: string): Promise<number> {
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
     return await provider.getTransactionCount(address);
   }
 }
