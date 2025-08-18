@@ -21,6 +21,7 @@ export interface ConnectionState {
 }
 
 export interface TransactionRequest {
+  from?: string;
   to: string;
   data?: string;
   value?: string;
