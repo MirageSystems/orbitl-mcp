@@ -7,6 +7,11 @@ import { AIClient } from './client.js';
 import { ContractReader } from '../analysis/reader.js';
 import { SeiProvider, SEI_MAINNET_CONFIG, SEI_TESTNET_CONFIG } from '../network/sei.js';
 import type { ContractData, ABIFunction } from '../analysis/types.js';
+import { TransactionInterface } from '../wallet/transaction-interface.js';
+import { CLIFormatter } from '../utils/formatter/cli-formatter.js';
+import { WalletConnect, WALLETCONNECT_CONFIG } from '../wallet/wallet-connect.js';
+import { TransactionBuildError } from '../wallet/types.js';
+import type { DetailedTransactionPreview } from '../wallet/types.js';
 import log from '../utils/logger.js';
 
 /**
@@ -17,8 +22,18 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
   const mainnetReader = new ContractReader(new SeiProvider(SEI_MAINNET_CONFIG));
   const testnetReader = new ContractReader(new SeiProvider(SEI_TESTNET_CONFIG));
   
+  // Initialize transaction interfaces for both networks
+  const mainnetConfig = SEI_MAINNET_CONFIG;
+  const testnetConfig = SEI_TESTNET_CONFIG;
+  const mainnetTxInterface = new TransactionInterface(mainnetConfig.rpcUrl);
+  const testnetTxInterface = new TransactionInterface(testnetConfig.rpcUrl);
+  
   const getReader = (net?: string) => {
     return (net === 'testnet' || network === 'testnet') ? testnetReader : mainnetReader;
+  };
+
+  const getTxInterface = (net?: string) => {
+    return (net === 'testnet' || network === 'testnet') ? testnetTxInterface : mainnetTxInterface;
   };
 
   // ============================================
@@ -210,53 +225,286 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
   );
 
   // ============================================
-  // TOOL 4: BUILD TRANSACTION (UNSIGNED)
+  // TOOL 4: BUILD TOKEN TRANSFER
   // ============================================
   ai.registerTool(
-    'build_transaction',
-    'Build unsigned transaction data for a contract function call (NEVER signs transactions)',
+    'build_token_transfer',
+    'Build a safe ERC-20 token transfer transaction with beautiful preview (NEVER signs)',
     {
       type: 'object',
       properties: {
-        contract: {
+        tokenAddress: {
           type: 'string',
-          description: 'The contract address'
+          description: 'The token contract address (e.g., USDC contract)'
         },
-        method: {
+        recipient: {
           type: 'string',
-          description: 'Function name to call'
+          description: 'Recipient wallet address or ENS name'
         },
-        args: {
-          type: 'array',
-          description: 'Function arguments',
-          items: { type: 'string' }
-        },
-        value: {
+        amount: {
           type: 'string',
-          description: 'ETH/SEI value to send (optional)',
-          default: '0'
+          description: 'Amount to transfer (e.g., "100.5" for 100.5 tokens)'
+        },
+        network: {
+          type: 'string',
+          description: 'Network to use: mainnet or testnet',
+          enum: ['mainnet', 'testnet']
+        },
+        tokenSymbol: {
+          type: 'string',
+          description: 'Token symbol for better display (optional)',
+          default: 'TOKEN'
         }
       },
-      required: ['contract', 'method']
+      required: ['tokenAddress', 'recipient', 'amount']
     },
-    async (args: { contract: string; method: string; args?: string[]; value?: string }) => {
-      // This is a mock implementation - in production would properly encode the function call
-      return {
-        to: args.contract,
-        data: `0x${Buffer.from(`${args.method}(${(args.args || []).join(',')})`).toString('hex')}`, // Mock encoding
-        value: args.value || '0',
-        gasLimit: '200000', // Estimated
-        network: network,
-        warning: '🔒 This is unsigned transaction data. NEVER share private keys!',
-        instructions: [
-          '1. Copy this transaction data',
-          '2. Open your wallet (MetaMask, Keplr, etc.)',
-          '3. Paste and review the transaction carefully',
-          '4. Sign with YOUR wallet (we never touch your keys)',
-          '5. Submit to network'
-        ],
-        securityNote: 'Orbitl NEVER handles private keys or signs transactions. You maintain full control of your assets.'
-      };
+    async (args: { 
+      tokenAddress: string; 
+      recipient: string; 
+      amount: string; 
+      network?: string;
+      tokenSymbol?: string;
+    }) => {
+      try {
+        log.info(`Building token transfer: ${args.amount} ${args.tokenSymbol || 'tokens'} to ${args.recipient}`);
+        
+        const txInterface = getTxInterface(args.network);
+        const context = {
+          tokenSymbol: args.tokenSymbol,
+          recipientName: args.recipient.endsWith('.eth') ? args.recipient : undefined
+        };
+
+        const result = await txInterface.buildTransferWithPreview(
+          args.tokenAddress,
+          args.recipient,
+          args.amount,
+          context
+        );
+
+        return {
+          success: true,
+          transactionData: result.transactionData.transaction,
+          preview: result.preview,
+          formattedPreview: result.formattedPreview,
+          network: args.network || network,
+          securityNote: '🔒 Orbitl NEVER handles private keys. You sign with YOUR wallet.',
+          instructions: [
+            '1. Review the transaction preview above carefully',
+            '2. Connect your wallet (we\'ll help with that)',
+            '3. Sign the transaction in YOUR wallet',
+            '4. Never share private keys with anyone!'
+          ]
+        };
+
+      } catch (error) {
+        const errorMessage = error instanceof TransactionBuildError ? 
+          error.message : 
+          `Failed to build transfer: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        
+        return {
+          success: false,
+          error: errorMessage,
+          suggestions: error instanceof TransactionBuildError ? error.suggestions : [
+            'Check that the token address is valid',
+            'Verify the recipient address is correct',
+            'Ensure the amount format is correct (e.g., "100.5")'
+          ]
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // TOOL 5: BUILD TOKEN APPROVAL
+  // ============================================
+  ai.registerTool(
+    'build_token_approval',
+    'Build a safe ERC-20 token approval transaction with beautiful preview (NEVER signs)',
+    {
+      type: 'object',
+      properties: {
+        tokenAddress: {
+          type: 'string',
+          description: 'The token contract address'
+        },
+        spender: {
+          type: 'string',
+          description: 'Address that will be allowed to spend tokens (e.g., DEX contract)'
+        },
+        amount: {
+          type: 'string',
+          description: 'Amount to approve ("unlimited" for max approval, or specific amount like "100.5")'
+        },
+        network: {
+          type: 'string',
+          description: 'Network to use: mainnet or testnet',
+          enum: ['mainnet', 'testnet']
+        },
+        tokenSymbol: {
+          type: 'string',
+          description: 'Token symbol for better display (optional)'
+        },
+        spenderName: {
+          type: 'string',
+          description: 'Known name of the spender (e.g., "Uniswap V3", optional)'
+        }
+      },
+      required: ['tokenAddress', 'spender', 'amount']
+    },
+    async (args: { 
+      tokenAddress: string; 
+      spender: string; 
+      amount: string; 
+      network?: string;
+      tokenSymbol?: string;
+      spenderName?: string;
+    }) => {
+      try {
+        log.info(`Building token approval: ${args.amount} ${args.tokenSymbol || 'tokens'} for ${args.spenderName || args.spender}`);
+        
+        const txInterface = getTxInterface(args.network);
+        const context = {
+          tokenSymbol: args.tokenSymbol,
+          spenderName: args.spenderName
+        };
+
+        const result = await txInterface.buildApprovalWithPreview(
+          args.tokenAddress,
+          args.spender,
+          args.amount,
+          context
+        );
+
+        return {
+          success: true,
+          transactionData: result.transactionData.transaction,
+          preview: result.preview,
+          formattedPreview: result.formattedPreview,
+          network: args.network || network,
+          riskWarning: args.amount.toLowerCase().includes('unlimited') ? 
+            '⚠️ UNLIMITED APPROVAL: This allows the spender to take ALL of your tokens at any time!' : 
+            undefined,
+          securityNote: '🔒 Orbitl NEVER handles private keys. You sign with YOUR wallet.',
+          instructions: [
+            '1. Review the transaction preview and warnings above',
+            '2. Consider using specific amounts instead of unlimited approvals',
+            '3. Connect your wallet (we\'ll help with that)',
+            '4. Sign the transaction in YOUR wallet'
+          ]
+        };
+
+      } catch (error) {
+        const errorMessage = error instanceof TransactionBuildError ? 
+          error.message : 
+          `Failed to build approval: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        
+        return {
+          success: false,
+          error: errorMessage,
+          suggestions: error instanceof TransactionBuildError ? error.suggestions : [
+            'Check that the token address is valid',
+            'Verify the spender address is correct',
+            'Use "unlimited" for max approval or specific amount like "100.5"'
+          ]
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // TOOL 6: BUILD TRANSFER FROM
+  // ============================================
+  ai.registerTool(
+    'build_transfer_from',
+    'Build a transferFrom transaction using existing token allowance (NEVER signs)',
+    {
+      type: 'object',
+      properties: {
+        tokenAddress: {
+          type: 'string',
+          description: 'The token contract address'
+        },
+        from: {
+          type: 'string',
+          description: 'Address to transfer tokens from (must have given approval)'
+        },
+        to: {
+          type: 'string',
+          description: 'Address to transfer tokens to'
+        },
+        amount: {
+          type: 'string',
+          description: 'Amount to transfer'
+        },
+        network: {
+          type: 'string',
+          description: 'Network to use: mainnet or testnet',
+          enum: ['mainnet', 'testnet']
+        },
+        tokenSymbol: {
+          type: 'string',
+          description: 'Token symbol for better display (optional)'
+        }
+      },
+      required: ['tokenAddress', 'from', 'to', 'amount']
+    },
+    async (args: { 
+      tokenAddress: string; 
+      from: string;
+      to: string;
+      amount: string; 
+      network?: string;
+      tokenSymbol?: string;
+    }) => {
+      try {
+        log.info(`Building transferFrom: ${args.amount} ${args.tokenSymbol || 'tokens'} from ${args.from} to ${args.to}`);
+        
+        const txInterface = getTxInterface(args.network);
+        const context = {
+          tokenSymbol: args.tokenSymbol,
+          fromName: args.from.endsWith('.eth') ? args.from : undefined,
+          recipientName: args.to.endsWith('.eth') ? args.to : undefined
+        };
+
+        const result = await txInterface.buildTransferFromWithPreview(
+          args.tokenAddress,
+          args.from,
+          args.to,
+          args.amount,
+          context
+        );
+
+        return {
+          success: true,
+          transactionData: result.transactionData.transaction,
+          preview: result.preview,
+          formattedPreview: result.formattedPreview,
+          network: args.network || network,
+          allowanceWarning: '⚠️ This transaction requires existing token allowance from the source address',
+          securityNote: '🔒 Orbitl NEVER handles private keys. You sign with YOUR wallet.',
+          instructions: [
+            '1. Ensure you have permission to spend from the source address',
+            '2. Review the transaction preview above',
+            '3. Connect your wallet (we\'ll help with that)',
+            '4. Sign the transaction in YOUR wallet'
+          ]
+        };
+
+      } catch (error) {
+        const errorMessage = error instanceof TransactionBuildError ? 
+          error.message : 
+          `Failed to build transferFrom: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        
+        return {
+          success: false,
+          error: errorMessage,
+          suggestions: error instanceof TransactionBuildError ? error.suggestions : [
+            'Check that all addresses are valid',
+            'Verify you have approval to spend from the source address',
+            'Ensure the amount format is correct'
+          ]
+        };
+      }
     }
   );
 
@@ -318,7 +566,174 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
     }
   );
 
-  log.info(`✅ Registered ${ai.getRegisteredTools().length} contract analysis tools`);
+  // ============================================
+  // TOOL 7: CONNECT WALLET
+  // ============================================
+  ai.registerTool(
+    'connect_wallet',
+    'Generate QR code to safely connect user wallet via WalletConnect (NEVER handles private keys)',
+    {
+      type: 'object',
+      properties: {
+        network: {
+          type: 'string',
+          description: 'Network to connect to: mainnet or testnet',
+          enum: ['mainnet', 'testnet'],
+          default: 'mainnet'
+        }
+      }
+    },
+    async (args: { network?: string }) => {
+      try {
+        log.info(`Initializing WalletConnect for ${args.network || network}`);
+        
+        const wallet = new WalletConnect(WALLETCONNECT_CONFIG);
+        await wallet.initialize();
+        
+        const selectedChains = [(args.network === 'testnet') ? "eip155:1328" : "eip155:1329"];
+        const { uri, qrCodeData } = await wallet.generateConnectionURI();
+
+        return {
+          success: true,
+          connectionUri: uri,
+          qrCodeData,
+          instructions: [
+            '🔗 WalletConnect Session Ready',
+            '',
+            '📱 Scan the QR code above with your mobile wallet app:',
+            '  • MetaMask Mobile',
+            '  • Trust Wallet', 
+            '  • Rainbow Wallet',
+            '  • Any WalletConnect-compatible wallet',
+            '',
+            '🔒 SECURITY: Orbitl NEVER sees your private keys!',
+            '   Your keys stay safely in YOUR wallet.',
+            '',
+            '⏱️ Connection will timeout in 2 minutes if not accepted.'
+          ],
+          securityNote: '🛡️ WalletConnect is a secure protocol. Your private keys never leave your device.',
+          networkInfo: {
+            network: args.network || network,
+            chainId: (args.network === 'testnet') ? '1328' : '1329',
+            name: (args.network === 'testnet') ? 'Sei Atlantic-2 (Testnet)' : 'Sei Pacific-1 (Mainnet)'
+          }
+        };
+
+      } catch (error) {
+        return {
+          success: false,
+          error: `Failed to initialize wallet connection: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          suggestions: [
+            'Check your internet connection',
+            'Make sure you have a WalletConnect-compatible wallet app installed',
+            'Try again in a few moments'
+          ]
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // TOOL 8: CHECK WALLET CONNECTION
+  // ============================================
+  ai.registerTool(
+    'check_wallet_connection',
+    'Check if a wallet is currently connected via WalletConnect',
+    {
+      type: 'object',
+      properties: {}
+    },
+    async () => {
+      try {
+        // Note: This is a simplified check. In a full implementation,
+        // we'd maintain wallet connection state in a session manager
+        return {
+          connected: false,
+          message: 'No active wallet connection found',
+          instructions: [
+            'Use the "connect_wallet" tool to establish a connection',
+            'Make sure to scan the QR code with your mobile wallet',
+            'Accept the connection request in your wallet app'
+          ],
+          securityNote: '🔒 Orbitl NEVER stores wallet connection state with private keys'
+        };
+      } catch (error) {
+        return {
+          connected: false,
+          error: `Error checking wallet connection: ${error instanceof Error ? error.message : 'Unknown error'}`
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // TOOL 9: SHOW TRANSACTION PREVIEW
+  // ============================================
+  ai.registerTool(
+    'show_transaction_preview',
+    'Display a beautiful formatted preview of transaction data for user review',
+    {
+      type: 'object',
+      properties: {
+        transactionData: {
+          type: 'object',
+          description: 'Transaction data from build_token_* tools'
+        },
+        preview: {
+          type: 'object', 
+          description: 'Preview data from build_token_* tools'
+        },
+        network: {
+          type: 'string',
+          description: 'Network the transaction is for'
+        }
+      },
+      required: ['transactionData', 'preview']
+    },
+    async (args: { transactionData: any; preview: any; network?: string }) => {
+      try {
+        // The transaction tools already return formatted previews,
+        // but this tool can be used to re-display or format differently
+        const preview = args.preview as DetailedTransactionPreview;
+        const formattedPreview = CLIFormatter.formatTransactionPreview(preview);
+
+        return {
+          success: true,
+          formattedPreview,
+          summary: {
+            action: preview.action,
+            riskLevel: preview.riskLevel,
+            totalCost: preview.totalCost,
+            contractVerified: preview.contractVerified
+          },
+          instructions: [
+            '📋 Review the transaction details above carefully',
+            '⚠️ Pay special attention to risk warnings',
+            '💰 Check the gas cost estimate', 
+            '🔒 Connect your wallet when ready to sign',
+            '❌ NEVER share your private keys with anyone!'
+          ],
+          nextSteps: [
+            'If everything looks correct, use "connect_wallet" to establish connection',
+            'Once connected, you can sign this transaction in YOUR wallet',
+            'The transaction will be submitted to the network after signing'
+          ]
+        };
+
+      } catch (error) {
+        return {
+          success: false,
+          error: `Failed to format transaction preview: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          suggestions: [
+            'Make sure the transaction data is valid',
+            'Try rebuilding the transaction if needed'
+          ]
+        };
+      }
+    }
+  );
+
+  log.info(`✅ Registered ${ai.getRegisteredTools().length} contract analysis and transaction tools`);
   return ai;
 }
 

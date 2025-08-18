@@ -172,8 +172,7 @@ program
       spinner.text = "Generating connection QR code...";
 
       // Generate connection URI
-      const selectedChains = [options.testnet ? "eip155:1328" : "eip155:1329"];
-      const { uri, qrCodeData } = await wallet.generateConnectionURI({ chains: selectedChains });
+      const { uri, qrCodeData } = await wallet.generateConnectionURI();
       spinner.succeed("QR code generated!");
 
       console.log(chalk.green("\n🔗 WalletConnect Session"));

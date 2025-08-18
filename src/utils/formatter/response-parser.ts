@@ -67,7 +67,7 @@ export class ResponseParser {
    */
   private static extractSafetyScore(response: string): number {
     const match = response.match(/safety score[^\d]*(\d+)/i);
-    return match ? parseInt(match[1]) : 50;
+    return match ? parseInt(match[1] || '50') : 50;
   }
 
   /**
@@ -95,7 +95,7 @@ export class ResponseParser {
       const riskMatch = match.match(/(CRITICAL|HIGH|MEDIUM|LOW|NONE)/i);
       const descriptionMatch = match.match(/\*\*[^*]+\*\*:\s*([^(]+)/);
       
-      if (nameMatch) {
+      if (nameMatch && nameMatch[1]) {
         const name = nameMatch[1].trim();
         functions.push({
           name,
@@ -114,6 +114,6 @@ export class ResponseParser {
    */
   private static extractTotalFunctions(response: string): number {
     const match = response.match(/(\d+)\s+total\s+functions/i);
-    return match ? parseInt(match[1]) : 0;
+    return match ? parseInt(match[1] || '0') : 0;
   }
 }

@@ -6,6 +6,7 @@ import chalk from 'chalk';
 import { UIComponents } from './ui-components.js';
 import { ResponseParser } from './response-parser.js';
 import type { ContractAnalysisData } from './types.js';
+import type { DetailedTransactionPreview, PreviewParameter, UserConfirmation, RiskLevel } from '../../wallet/types.js';
 
 export class CLIFormatter {
   
@@ -166,7 +167,7 @@ export class CLIFormatter {
       ['clear', 'Clear conversation history'],
       ['tools', 'Show available analysis tools'],
       ['exit', 'Exit Orbitl']
-    ].map(([cmd, desc]) => [chalk.yellow(cmd), desc]);
+    ].map(([cmd, desc]) => [chalk.yellow(cmd || ''), desc || '']);
 
     output += chalk.bold.blue('🔧 Commands\n\n');
     output += UIComponents.createTable(['Command', 'Description'], commandRows, {
@@ -229,6 +230,275 @@ export class CLIFormatter {
     }
 
     return output;
+  }
+
+  /**
+   * Format transaction preview for user confirmation
+   */
+  static formatTransactionPreview(preview: DetailedTransactionPreview): string {
+    let output = '';
+
+    // Transaction Header
+    output += this.formatTransactionHeader(preview);
+    output += '\n\n';
+
+    // Contract Information
+    output += this.formatTransactionContractInfo(preview);
+    output += '\n\n';
+
+    // Transaction Details
+    output += this.formatTransactionDetails(preview);
+    output += '\n\n';
+
+    // Risk Assessment
+    output += this.formatTransactionRiskAssessment(preview);
+    output += '\n\n';
+
+    // Gas & Cost Information
+    output += this.formatTransactionCost(preview);
+
+    // Safety Warnings (if any)
+    if (preview.safetyWarnings && preview.safetyWarnings.length > 0) {
+      output += '\n\n';
+      output += this.formatSafetyWarnings(preview.safetyWarnings);
+    }
+
+    // User Confirmations
+    if (preview.confirmations && preview.confirmations.length > 0) {
+      output += '\n\n';
+      output += this.formatUserConfirmations(preview.confirmations);
+    }
+
+    return output;
+  }
+
+  /**
+   * Format transaction header with title and description
+   */
+  private static formatTransactionHeader(preview: DetailedTransactionPreview): string {
+    const icon = this.getTransactionIcon(preview.action);
+    const content = `${icon} ${chalk.bold(preview.humanDescription)}`;
+
+    return UIComponents.createBox(content, {
+      title: `📋 ${preview.title}`,
+      color: 'cyan'
+    });
+  }
+
+  /**
+   * Format contract information for transaction
+   */
+  private static formatTransactionContractInfo(preview: DetailedTransactionPreview): string {
+    const verifiedIcon = preview.contractVerified ? '✅' : '❌';
+    const verifiedText = preview.contractVerified ? 
+      chalk.green('Verified') : 
+      chalk.red('Unverified');
+
+    const content = [
+      `${chalk.bold('Contract:')} ${chalk.magenta(preview.contractName)}`,
+      `${chalk.bold('Address:')} ${chalk.gray(preview.contractAddress)}`,
+      `${chalk.bold('Verified:')} ${verifiedIcon} ${verifiedText}`
+    ].join('\n');
+
+    return UIComponents.createBox(content, {
+      title: '📄 Contract Information',
+      color: 'blue'
+    });
+  }
+
+  /**
+   * Format transaction parameters and details
+   */
+  private static formatTransactionDetails(preview: DetailedTransactionPreview): string {
+    if (!preview.parameters || preview.parameters.length === 0) {
+      return '';
+    }
+
+    const rows = preview.parameters.map(param => [
+      chalk.yellow(param.name),
+      this.formatParameterValue(param),
+      chalk.gray(param.type)
+    ]);
+
+    let output = chalk.bold.blue('⚙️ Transaction Parameters\n\n');
+    output += UIComponents.createTable(
+      ['Parameter', 'Value', 'Type'],
+      rows,
+      {
+        colWidths: [20, 40, 15],
+        headerColor: 'cyan'
+      }
+    );
+
+    return output;
+  }
+
+  /**
+   * Format risk assessment section
+   */
+  private static formatTransactionRiskAssessment(preview: DetailedTransactionPreview): string {
+    const riskColor = this.getRiskColor(preview.riskLevel);
+    const riskIcon = this.getRiskIcon(preview.riskLevel);
+
+    let content = `${chalk.bold('Risk Level:')} ${riskIcon} ${chalk[riskColor](preview.riskLevel)}`;
+
+    if (preview.riskFactors && preview.riskFactors.length > 0) {
+      content += '\n' + chalk.bold('Risk Factors:');
+      preview.riskFactors.forEach(factor => {
+        content += `\n• ${chalk.yellow(factor)}`;
+      });
+    }
+
+    return UIComponents.createBox(content, {
+      title: '⚠️ Risk Assessment',
+      color: riskColor
+    });
+  }
+
+  /**
+   * Format gas and cost information
+   */
+  private static formatTransactionCost(preview: DetailedTransactionPreview): string {
+    const gasEstimate = preview.gasEstimate;
+    
+    const content = [
+      `${chalk.bold('Gas Limit:')} ${chalk.cyan(Number(gasEstimate.gasLimit).toLocaleString())} units`,
+      `${chalk.bold('Gas Price:')} ${chalk.cyan(this.formatGasPrice(gasEstimate.gasPrice))}`,
+      `${chalk.bold('Total Cost:')} ${chalk.green(preview.totalCost)}`,
+      `${chalk.bold('Confidence:')} ${this.formatConfidence(gasEstimate.confidence)}`
+    ].join('\n');
+
+    return UIComponents.createBox(content, {
+      title: '💰 Cost Estimate',
+      color: 'green'
+    });
+  }
+
+  /**
+   * Format safety warnings
+   */
+  private static formatSafetyWarnings(warnings: string[]): string {
+    const content = warnings.map(warning => `⚠️ ${warning}`).join('\n');
+
+    return UIComponents.createBox(content, {
+      title: '🚨 Safety Warnings',
+      color: 'yellow'
+    });
+  }
+
+  /**
+   * Format user confirmations
+   */
+  private static formatUserConfirmations(confirmations: UserConfirmation[]): string {
+    let output = '';
+
+    confirmations.forEach((confirmation, index) => {
+      const icon = this.getConfirmationIcon(confirmation.type);
+      const color = this.getConfirmationColor(confirmation.type);
+      
+      const title = confirmation.userMustAcknowledge ? 
+        '⚠️ Required Confirmation' : 
+        '💡 Information';
+
+      const content = `${icon} ${confirmation.message}`;
+
+      output += UIComponents.createBox(content, {
+        title,
+        color
+      });
+
+      if (index < confirmations.length - 1) {
+        output += '\n\n';
+      }
+    });
+
+    return output;
+  }
+
+  /**
+   * Helper methods for formatting transaction previews
+   */
+  private static getTransactionIcon(action: string): string {
+    const icons: Record<string, string> = {
+      'transfer': '💸',
+      'approve': '✅',
+      'transferFrom': '🔄',
+      'swap': '🔀',
+      'stake': '🔒',
+      'unstake': '🔓',
+      'unknown': '❓'
+    };
+    return icons[action] || '📝';
+  }
+
+  private static getRiskColor(riskLevel: RiskLevel): 'green' | 'yellow' | 'red' {
+    const colors: Record<RiskLevel, 'green' | 'yellow' | 'red'> = {
+      'LOW': 'green',
+      'MEDIUM': 'yellow', 
+      'HIGH': 'red',
+      'CRITICAL': 'red' // Use red for critical since magenta isn't supported
+    };
+    return colors[riskLevel];
+  }
+
+  private static getRiskIcon(riskLevel: RiskLevel): string {
+    const icons: Record<RiskLevel, string> = {
+      'LOW': '🟢',
+      'MEDIUM': '🟡',
+      'HIGH': '🔴',
+      'CRITICAL': '🚨'
+    };
+    return icons[riskLevel];
+  }
+
+  private static formatParameterValue(param: PreviewParameter): string {
+    if (param.type === 'address') {
+      return chalk.magenta(param.displayValue);
+    } else if (param.type === 'amount') {
+      return chalk.green(param.displayValue);
+    } else {
+      return chalk.white(param.displayValue);
+    }
+  }
+
+  private static formatGasPrice(gasPrice: string): string {
+    // Convert wei to gwei for display
+    const gwei = Number(gasPrice) / 1e9;
+    return `${gwei.toFixed(2)} gwei`;
+  }
+
+  private static formatConfidence(confidence: 'LOW' | 'MEDIUM' | 'HIGH'): string {
+    const colors = {
+      'LOW': 'red',
+      'MEDIUM': 'yellow',
+      'HIGH': 'green'
+    } as const;
+    
+    const icons = {
+      'LOW': '🔴',
+      'MEDIUM': '🟡', 
+      'HIGH': '🟢'
+    };
+
+    return `${icons[confidence]} ${chalk[colors[confidence]](confidence)}`;
+  }
+
+  private static getConfirmationIcon(type: 'warning' | 'info' | 'critical'): string {
+    const icons = {
+      'warning': '⚠️',
+      'info': 'ℹ️',
+      'critical': '🚨'
+    };
+    return icons[type];
+  }
+
+  private static getConfirmationColor(type: 'warning' | 'info' | 'critical'): 'yellow' | 'blue' | 'red' {
+    const colors = {
+      'warning': 'yellow',
+      'info': 'blue', 
+      'critical': 'red'
+    } as const;
+    return colors[type];
   }
 
   /**
