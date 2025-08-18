@@ -13,18 +13,19 @@ import { Command } from "commander";
 import chalk from "chalk";
 import ora from "ora";
 import Table from "cli-table3";
-import { SeiProvider, SEI_TESTNET_CONFIG, SEI_MAINNET_CONFIG } from "../blockchain/sei-provider.js";
-import { ContractReader } from "../core/contract-reader.js";
-import { formatAddress } from "../types/contract.js";
-import type { ContractData, ABIFunction } from "../types/contract.js";
-import { ChatInterface } from "../chat/interface.js";
+import { SeiProvider, SEI_TESTNET_CONFIG, SEI_MAINNET_CONFIG } from "./network/sei.js";
+import { ContractReader } from "./analysis/reader.js";
+import { formatAddress } from "./analysis/types.js";
+import type { ContractData, ABIFunction } from "./analysis/types.js";
+import { ChatInterface } from "./interface/chat.js";
+import { log } from "./utils/index.js";
 
 const program = new Command();
 
 // CLI Setup
 program
   .name("orbitl")
-  .description("Smart Contract AI Assistant for Sei Network")
+  .description("🤖 Smart Contract AI Assistant for Sei Network with recursive tool calling")
   .version("1.0.0")
   .option('-n, --network <network>', 'Network to use (mainnet|testnet)', 'mainnet')
   .option('-c, --continue', 'Continue previous conversation')
@@ -38,21 +39,20 @@ program
     }
   });
 
-// Default action: Start chat interface
+// Default action: Start chat interface with recursive tool calling
 program.action(async (options) => {
   try {
     const chat = new ChatInterface({
-      network: options.network,
-      continue: options.continue,
+      network: options.network as 'mainnet' | 'testnet',
       verbose: options.verbose
     });
     await chat.start();
   } catch (error) {
     if (error instanceof Error && error.message.includes('CLOUDFLARE')) {
       console.error(chalk.red(error.message));
-      console.log(chalk.gray('\n💡 Set up your Cloudflare AI credentials:'));
-      console.log(chalk.gray('   export CLOUDFLARE_API_TOKEN="your_token"'));
-      console.log(chalk.gray('   export CLOUDFLARE_ACCOUNT_ID="your_account_id"'));
+      log.warn(chalk.yellow('\n💡 Set up your Cloudflare AI credentials in .env:'));
+      log.info(chalk.gray('   CLOUDFLARE_API_TOKEN="your_token"'));
+      log.info(chalk.gray('   CLOUDFLARE_ACCOUNT_ID="your_account_id"'));
     } else {
       console.error(chalk.red(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`));
     }
@@ -96,11 +96,11 @@ program
       // Show helpful suggestions
       if (error instanceof Error) {
         if (error.message.includes("Invalid address")) {
-          console.log(chalk.yellow("\n💡 Make sure the address is in format: 0x1234..."));
+          log.warn(chalk.yellow("\n💡 Make sure the address is in format: 0x1234..."));
         } else if (error.message.includes("not a contract")) {
-          console.log(chalk.yellow("\n💡 This address doesn't contain a smart contract"));
+          log.warn(chalk.yellow("\n💡 This address doesn't contain a smart contract"));
         } else if (error.message.includes("Network connection")) {
-          console.log(chalk.yellow("\n💡 Check your internet connection and try again"));
+          log.warn(chalk.yellow("\n💡 Check your internet connection and try again"));
         }
       }
       
@@ -141,7 +141,7 @@ program
         ["RPC URL", config.rpcUrl]
       );
       
-      console.log("\n" + table.toString());
+      log.info("\n" + table.toString());
       
     } catch (error) {
       spinner.fail("Connection failed");
@@ -154,7 +154,7 @@ program
  * Display contract information in nice tables
  */
 function displayContractInfo(contractData: ContractData, options: { detailed?: boolean }) {
-  console.log("\n" + chalk.bold.blue("📄 Contract Analysis Results"));
+  log.info("\n" + chalk.bold.blue("📄 Contract Analysis Results"));
   
   // Basic info table
   const basicTable = new Table({
@@ -170,13 +170,13 @@ function displayContractInfo(contractData: ContractData, options: { detailed?: b
     ["Write", `${contractData.writeFunctions.length} functions`]
   );
   
-  console.log("\n" + basicTable.toString());
+  log.info("\n" + basicTable.toString());
   
   // Show functions if detailed or if few functions
   if (options.detailed || contractData.functionCount <= 10) {
     displayFunctions(contractData.abi);
   } else {
-    console.log(chalk.gray(`\n💡 Use --detailed flag to see all ${contractData.functionCount} functions`));
+    log.info(chalk.gray(`\n💡 Use --detailed flag to see all ${contractData.functionCount} functions`));
   }
   
   // Show type-specific info
@@ -188,11 +188,11 @@ function displayContractInfo(contractData: ContractData, options: { detailed?: b
  */
 function displayFunctions(functions: ABIFunction[]) {
   if (functions.length === 0) {
-    console.log(chalk.yellow("\n⚠️  No functions found (unverified contract)"));
+    log.warn(chalk.yellow("\n⚠️  No functions found (unverified contract)"));
     return;
   }
   
-  console.log("\n" + chalk.bold.blue("🔧 Available Functions"));
+  log.info("\n" + chalk.bold.blue("🔧 Available Functions"));
   
   const funcTable = new Table({
     head: [chalk.cyan("Function"), chalk.cyan("Description"), chalk.cyan("Type")]
@@ -208,7 +208,7 @@ function displayFunctions(functions: ABIFunction[]) {
     funcTable.push([signature, description, type]);
   });
   
-  console.log("\n" + funcTable.toString());
+  log.info("\n" + funcTable.toString());
 }
 
 /**
@@ -218,27 +218,27 @@ function displayTypeSpecificInfo(contractData: ContractData) {
   const { basicType, abi } = contractData;
   
   if (basicType === "Token" && contractData.isVerified) {
-    console.log(chalk.green("\n💰 Token Contract Detected"));
-    console.log("  • Can send/receive tokens");
-    console.log("  • Check balances and allowances");
+    log.info(chalk.green("\n💰 Token Contract Detected"));
+    log.info("  • Can send/receive tokens");
+    log.info("  • Check balances and allowances");
     if (abi.some(f => f.name === "decimals")) {
-      console.log("  • Has decimal configuration");
+      log.info("  • Has decimal configuration");
     }
   } else if (basicType === "DEX" && contractData.isVerified) {
-    console.log(chalk.blue("\n🔄 DEX Contract Detected"));
-    console.log("  • Can swap tokens");
+    log.info(chalk.blue("\n🔄 DEX Contract Detected"));
+    log.info("  • Can swap tokens");
     if (abi.some(f => f.name.includes("Liquidity"))) {
-      console.log("  • Supports liquidity operations");
+      log.info("  • Supports liquidity operations");
     }
   } else if (basicType === "Farm" && contractData.isVerified) {
-    console.log(chalk.magenta("\n🌾 Farm Contract Detected"));
-    console.log("  • Can stake/deposit tokens");
-    console.log("  • Earn rewards over time");
+    log.info(chalk.magenta("\n🌾 Farm Contract Detected"));
+    log.info("  • Can stake/deposit tokens");
+    log.info("  • Earn rewards over time");
   } else if (basicType === "Unknown") {
-    console.log(chalk.gray("\n❓ Unknown Contract Type"));
+    log.info(chalk.gray("\n❓ Unknown Contract Type"));
     if (!contractData.isVerified) {
-      console.log("  • Contract not verified on explorer");
-      console.log("  • Cannot determine functionality");
+      log.info("  • Contract not verified on explorer");
+      log.info("  • Cannot determine functionality");
     }
   }
 }
