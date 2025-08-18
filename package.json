@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "Natural language interface for Sei smart contract interaction",
   "type": "module",
-  "main": "dist/cli/index.js",
+  "main": "dist/cli.js",
   "bin": {
-    "orbitl": "dist/cli/index.js"
+    "orbitl": "dist/cli.js"
   },
   "scripts": {
-    "dev": "tsx src/cli/index.ts",
+    "dev": "tsx src/cli.ts",
     "build": "tsc",
-    "start": "node dist/cli/index.js",
+    "start": "node dist/cli.js",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "keywords": [
@@ -26,13 +26,20 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "boxen": "^8.0.1",
     "chalk": "^5.5.0",
+    "cli-highlight": "^2.1.11",
     "cli-table3": "^0.6.5",
     "commander": "^14.0.0",
+    "dotenv": "^17.2.1",
     "ethers": "6",
-    "ora": "^8.2.0"
+    "figlet": "^1.8.2",
+    "gradient-string": "^3.0.0",
+    "ora": "^8.2.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@types/figlet": "^1.7.0",
     "@types/node": "^24.3.0",
     "prettier": "^3.6.2",
     "tsx": "^4.20.4",

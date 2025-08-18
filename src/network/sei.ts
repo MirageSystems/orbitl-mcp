@@ -5,8 +5,8 @@ import { ethers } from "ethers";
 import type { 
   NetworkConfig, 
   ABIFunction 
-} from "../types/contract.js";
-import { ContractError } from "../types/contract.js";
+} from "../analysis/types.js";
+import { ContractError } from "../analysis/types.js";
 
 export class SeiProvider {
   private provider: ethers.JsonRpcProvider;

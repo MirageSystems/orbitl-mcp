@@ -5,9 +5,9 @@ import type {
   ContractData, 
   ABIFunction, 
   ContractType
-} from "../types/contract.js";
-import { isValidAddress } from "../types/contract.js";
-import { SeiProvider } from "../blockchain/sei-provider.js";
+} from "./types.js";
+import { isValidAddress } from "./types.js";
+import { SeiProvider } from "../network/sei.js";
 
 export class ContractReader {
   private seiProvider: SeiProvider;
