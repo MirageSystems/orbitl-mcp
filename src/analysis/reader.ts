@@ -1,5 +1,5 @@
-// Phase 1: Contract Reader - Simple contract analysis
-// Battle-tested approach: simple pattern matching, no complex logic
+// Phase 1: Contract Reader - Contract analysis
+// Battle-tested approach: pattern matching, no complex logic
 
 import type { 
   ContractData, 
@@ -18,7 +18,7 @@ export class ContractReader {
 
   /**
    * Main method: Read and analyze a contract
-   * Simple, reliable process following the plan
+   * Reliable process following the plan
    */
   async read(address: string): Promise<ContractData> {
     // Step 1: Validate address format
@@ -70,7 +70,7 @@ export class ContractReader {
   }
 
   /**
-   * Simple contract type detection based on function names
+   * Contract type detection based on function names
    * Battle-tested approach: explicit pattern matching
    */
   private detectContractType(abi: ABIFunction[]): ContractType {
@@ -120,7 +120,7 @@ export class ContractReader {
 
   /**
    * Get human-readable function description
-   * Simple mapping for common functions
+   * Mapping for common functions
    */
   static getFunctionDescription(func: ABIFunction): string {
     const name = func.name.toLowerCase();

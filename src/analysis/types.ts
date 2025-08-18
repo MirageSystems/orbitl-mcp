@@ -1,10 +1,10 @@
 /**
- * @fileoverview Core type definitions for Sei smart contract analysis
+ * @fileoverview Core type definitions for Sei contract analysis
  * @author Orbitl Team
  */
 
 /**
- * Smart contract types that can be automatically detected from ABI patterns
+ * Contract types that can be automatically detected from ABI patterns
  */
 export type ContractType = 
   | "Token"    // ERC-20/721 tokens (has transfer, balanceOf)
@@ -13,7 +13,7 @@ export type ContractType =
   | "Unknown"; // Everything else
 
 /**
- * Smart contract function definition from ABI
+ * Contract function definition from ABI
  * Based on ethers.js ABI structure
  */
 export interface ABIFunction {

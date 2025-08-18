@@ -1,141 +1,73 @@
 /**
- * @fileoverview Main CLI formatter class
+ * CLI Formatter using existing UI components
  */
 
 import chalk from 'chalk';
 import { UIComponents } from './ui-components.js';
-import { ResponseParser } from './response-parser.js';
-import type { ContractAnalysisData } from './types.js';
+import type { DetailedTransactionPreview } from '../../wallet/types.js';
 
 export class CLIFormatter {
-  
   /**
-   * Format contract analysis results beautifully
+   * Parse and format AI responses with network context
    */
-  static formatContractAnalysis(analysis: ContractAnalysisData): string {
-    let output = '';
+  static parseAndFormat(text: string, network: 'mainnet' | 'testnet'): string {
+    return UIComponents.formatBasicText(text);
+  }
 
-    // Contract Information Box
-    output += this.formatContractInfo(analysis);
-    output += '\n\n';
-
-    // Safety Assessment Box
-    output += this.formatSafetyAssessment(analysis);
-    output += '\n\n';
-
-    // Key Functions Table (if available)
-    if (analysis.keyFunctions && analysis.keyFunctions.length > 0) {
-      output += this.formatFunctionsTable(analysis.keyFunctions);
-      output += '\n\n';
+  /**
+   * Format transaction preview for display
+   */
+  static formatTransactionPreview(preview: DetailedTransactionPreview): string {
+    let output = `\nTransaction Preview\n`;
+    output += `═`.repeat(50) + '\n';
+    
+    output += `Action: ${preview.action}\n`;
+    output += `Risk Level: [${preview.riskLevel}]\n`;
+    output += `Contract Verified: ${preview.contractVerified ? '✓ Yes' : '✗ No'}\n`;
+    output += `Total Cost: ${preview.totalCost}\n`;
+    
+    if (preview.warnings && preview.warnings.length > 0) {
+      output += `\nWarnings:\n`;
+      preview.warnings.forEach(warning => output += `  • ${warning}\n`);
     }
-
-    // Summary Box
-    if (analysis.summary) {
-      output += this.formatSummary(analysis.summary);
-    }
-
+    
+    output += `\nOrbitl NEVER handles your private keys\n`;
+    output += `═`.repeat(50);
+    
     return output;
   }
 
   /**
-   * Format contract information section
+   * Format error messages with suggestions
    */
-  private static formatContractInfo(analysis: ContractAnalysisData): string {
-    const content = [
-      `${chalk.bold('Address:')} ${chalk.magenta(analysis.address || 'N/A')}`,
-      `${chalk.bold('Type:')} ${UIComponents.getTypeIcon(analysis.type)} ${chalk.cyan(analysis.type)}`,
-      `${chalk.bold('Network:')} ${chalk.blue(analysis.network)}`,
-      `${chalk.bold('Verified:')} ${analysis.verified ? chalk.green('✅ Yes') : chalk.red('❌ No')}`
-    ].join('\n');
-
-    return UIComponents.createBox(content, {
-      title: '📊 Contract Information',
-      color: 'cyan'
-    });
-  }
-
-  /**
-   * Format safety assessment section
-   */
-  private static formatSafetyAssessment(analysis: ContractAnalysisData): string {
-    const safetyColor = UIComponents.getSafetyColor(analysis.safetyScore);
+  static formatError(message: string, suggestions: string[] = []): string {
+    let output = chalk.red(`Error: ${message}\n`);
     
-    const content = [
-      `${chalk.bold('Score:')} ${UIComponents.formatSafetyScore(analysis.safetyScore)}`,
-      `${chalk.bold('Status:')} ${UIComponents.getRecommendationBadge(analysis.recommendation)}`,
-      analysis.risks && analysis.risks.length > 0 ? 
-        `${chalk.bold('Risks:')} ${analysis.risks.length} identified` :
-        `${chalk.bold('Risks:')} ${chalk.green('None detected')}`
-    ].join('\n');
-
-    return UIComponents.createBox(content, {
-      title: '🛡️ Safety Assessment',
-      color: safetyColor
-    });
-  }
-
-  /**
-   * Format functions table
-   */
-  private static formatFunctionsTable(functions: ContractAnalysisData['keyFunctions']): string {
-    if (!functions || functions.length === 0) return '';
-
-    let output = chalk.bold.blue('🔧 Key Functions\n\n');
-    
-    const rows = functions.slice(0, 8).map(func => [
-      chalk.yellow(func.name),
-      UIComponents.getRiskBadge(func.risk),
-      chalk.gray(func.type || 'unknown'),
-      func.description || `Execute ${func.name}`
-    ]);
-
-    output += UIComponents.createTable(
-      ['Function', 'Risk', 'Type', 'Description'],
-      rows,
-      {
-        colWidths: [25, 10, 12, 35],
-        headerColor: 'cyan'
-      }
-    );
-    
-    if (functions.length > 8) {
-      output += chalk.gray(`\n... and ${functions.length - 8} more functions`);
+    if (suggestions.length > 0) {
+      output += chalk.yellow(`\nSuggestions:\n`);
+      suggestions.forEach(suggestion => {
+        output += chalk.yellow(`  • ${suggestion}\n`);
+      });
     }
-
+    
     return output;
   }
 
   /**
-   * Format summary section
+   * Format welcome screen for chat interface
    */
-  private static formatSummary(summary: ContractAnalysisData['summary']): string {
-    if (!summary) return '';
-
-    const content = `📋 ${summary.totalFunctions} total functions • ` +
-                   `${summary.readOnlyFunctions} read-only • ` +
-                   `${summary.stateMutatingFunctions} state-changing`;
-
-    return UIComponents.createBox(content, {
-      title: '📈 Summary',
-      color: 'gray'
-    });
-  }
-
-  /**
-   * Format welcome screen
-   */
-  static formatWelcome(network: string): string {
+  static formatWelcome(network: 'mainnet' | 'testnet'): string {
     let output = '';
     
-    // Beautiful header
-    output += UIComponents.createHeader('ORBITL', '🚀 AI Smart Contract Analyst');
+    // Beautiful header using UIComponents
+    output += UIComponents.createHeader('ORBITL', '🚀 AI Contract Analyst');
     output += '\n\n';
 
-    // Network status box
+    // Network status box using UIComponents
     const networkInfo = [
       `${chalk.bold('Network:')} ${chalk.blue(network === 'mainnet' ? 'Sei Pacific-1 (Mainnet)' : 'Sei Atlantic-2 (Testnet)')}`,
       `${chalk.bold('Status:')} ${chalk.green('🟢 Connected')}`,
-      `${chalk.bold('Tools:')} ${chalk.cyan('5 analysis tools loaded')}`
+      `${chalk.bold('Tools:')} ${chalk.cyan('12 analysis tools loaded')}`
     ].join('\n');
 
     output += UIComponents.createBox(networkInfo, {
@@ -144,108 +76,70 @@ export class CLIFormatter {
     });
 
     output += '\n\n';
-    output += chalk.cyan('💬 Just paste a contract address or ask about smart contracts!');
+    output += chalk.cyan('💬 Just paste a contract address or ask about contracts!');
     output += chalk.gray('\n📝 Type "help" for examples, "tools" to see available tools\n');
 
     return output;
   }
 
   /**
-   * Format help screen
+   * Format help screen using UIComponents
    */
   static formatHelp(): string {
     let output = '';
 
-    // App header
-    output += UIComponents.createHeader('ORBITL', '🚀 AI Smart Contract Analyst for Sei Network');
+    // App header using UIComponents
+    output += UIComponents.createHeader('ORBITL', '🚀 AI Contract Analyst for Sei Network');
     output += '\n\n';
 
-    // Commands table
-    const commandRows = [
+    // Commands using UIComponents table
+    const commands = [
       ['help', 'Show this help message'],
       ['clear', 'Clear conversation history'],
       ['tools', 'Show available analysis tools'],
       ['exit', 'Exit Orbitl']
-    ].map(([cmd, desc]) => [chalk.yellow(cmd), desc]);
+    ];
 
-    output += chalk.bold.blue('🔧 Commands\n\n');
-    output += UIComponents.createTable(['Command', 'Description'], commandRows, {
-      colWidths: [15, 50]
-    });
+    output += UIComponents.createTable(['Command', 'Description'], commands);
     output += '\n\n';
 
     // Examples section
+    output += chalk.bold('Examples:\n');
     const examples = [
-      'Analyze 0x882f62fe8e9594470d1da0f70bc85096f6c60423',
-      'What is 0x1234...? Is it safe?',
-      'Show me the swap function details',
-      'Build a transaction to stake 100 tokens',
-      'How much gas does approve cost?'
+      '"analyze 0x742d35Cc6665Cb9D9dC69E7A1E15f2fc0C9A3456"',
+      '"what is USDC?"',
+      '"send 100 USDC to 0x123..."',
+      '"check safety of 0xabc..."'
     ];
-
-    output += chalk.bold.blue('💡 Example Queries\n\n');
-    examples.forEach((example, i) => {
-      output += chalk.gray(`${i + 1}. `) + chalk.cyan(`"${example}"`);
-      if (i < examples.length - 1) output += '\n';
-    });
-
-    output += '\n\n';
-
-    // Tips box
-    const tips = [
-      '• Just paste any contract address - I will analyze it automatically',
-      '• Ask follow-up questions - I remember our conversation',
-      '• I can chain multiple tools together for complete analysis',
-      '• For verified contracts, I will show detailed function breakdowns'
-    ].join('\n');
-
-    output += UIComponents.createBox(tips, {
-      title: '🎯 Pro Tips',
-      color: 'green'
+    examples.forEach(example => {
+      output += chalk.gray(`  • ${example}\n`);
     });
 
     return output;
   }
 
   /**
-   * Format error message
+   * Format tool list using UIComponents
    */
-  static formatError(error: string, suggestions?: string[]): string {
-    let output = '';
+  static formatTools(tools: string[]): string {
+    let output = chalk.bold('Available AI Tools:\n\n');
     
-    // Error box
-    output += UIComponents.createBox(`❌ ${error}`, {
-      title: '⚠️ Error',
-      color: 'red'
-    });
+    const categories = {
+      'Analysis': tools.filter(t => t.includes('analyze') || t.includes('check') || t.includes('function')),
+      'Transaction': tools.filter(t => t.includes('build') || t.includes('lookup')),
+      'Wallet': tools.filter(t => t.includes('connect') || t.includes('simulate') || t.includes('execute'))
+    };
 
-    if (suggestions && suggestions.length > 0) {
-      output += '\n\n';
-      const suggestionText = suggestions.map(s => `• ${s}`).join('\n');
-      output += UIComponents.createBox(suggestionText, {
-        title: '💡 Suggestions',
-        color: 'yellow'
-      });
-    }
-
-    return output;
-  }
-
-  /**
-   * Parse and format any AI response
-   */
-  static parseAndFormat(response: string, network: string): string {
-    // Check if this is contract analysis
-    if (ResponseParser.isContractAnalysis(response)) {
-      const contractData = ResponseParser.parseContractAnalysis(response, network);
-      
-      // Use beautiful formatter if we have meaningful data
-      if (contractData.address || contractData.type !== 'Unknown') {
-        return this.formatContractAnalysis(contractData);
+    Object.entries(categories).forEach(([category, categoryTools]) => {
+      if (categoryTools.length > 0) {
+        output += chalk.blue(`${category}:\n`);
+        categoryTools.forEach(tool => {
+          output += `  • ${tool}\n`;
+        });
+        output += '\n';
       }
-    }
-    
-    // Fallback to basic text formatting
-    return UIComponents.formatBasicText(response);
+    });
+
+    return output;
   }
 }

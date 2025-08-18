@@ -1,7 +1,7 @@
 {
   "name": "orbitl",
   "version": "1.0.0",
-  "description": "Natural language interface for Sei smart contract interaction",
+  "description": "Natural language interface for Sei contract interaction",
   "type": "module",
   "main": "dist/cli.js",
   "bin": {
@@ -18,7 +18,7 @@
     "blockchain",
     "cli",
     "mcp",
-    "smart-contracts"
+    "contracts"
   ],
   "author": "",
   "license": "MIT",

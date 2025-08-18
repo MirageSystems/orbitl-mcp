@@ -1,155 +1,58 @@
-# 🛰️ Orbitl
+# Orbitl
 
-**Natural language interface for Sei smart contract interaction**
+AI-powered contract analysis and safe transaction builder for Sei Network.
 
-A CLI tool with MCP integration that makes smart contract analysis and interaction as easy as natural conversation.
+## Features
 
-## 🎯 Current Status: Phase 1 - Contract Reading
+- Contract analysis with safety scoring
+- Natural language transaction building
+- WalletConnect integration for secure signing
+- Risk assessment and transaction simulation
+- Support for mainnet and testnet
 
-✅ **Phase 1 Goal**: Basic contract reading and analysis  
-🚧 **In Development**: USDC token analysis on Sei Atlantic-2 testnet
+## Quick Start
 
-### What Works Now
-- Connect to Sei Atlantic-2 testnet
-- Read contract bytecode and ABI from Seitrace
-- Basic contract type detection (Token/DEX/Farm)
-- CLI interface: `pnpm dev analyze <address> --testnet`
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 20+
-- pnpm
-
-### Installation
 ```bash
-git clone <repository>
-cd orbitl-mcp
+# Install dependencies
 pnpm install
-```
 
-### Usage
-```bash
-# Analyze USDC token on Sei testnet
-pnpm dev analyze 0x4fCF1784B31630811181f670Aea7A7bEF803eaED --testnet
-
-# Check network connection
-pnpm dev check --testnet
-```
-
-## 🧪 Test Contracts (Sei Atlantic-2 Testnet)
-
-| Contract | Address | Type | Purpose |
-|----------|---------|------|---------|
-| USDC | `0x4fCF1784B31630811181f670Aea7A7bEF803eaD` | Token | ERC-20 testing |
-
-**Network Details:**
-- Chain ID: 1328 (0x530)
-- RPC: https://evm-rpc-testnet.sei-apis.com
-- Explorer: https://seitrace.com/?chain=atlantic-2
-- Faucet: https://seitrace.com/tool/faucet?chain=atlantic-2
-
-## 🛠️ Tech Stack (Battle-Tested Libraries)
-
-- **Blockchain**: ethers.js v6 (mature, well-documented)
-- **CLI**: commander.js (standard CLI framework)
-- **Tables**: cli-table3 (clean output formatting)
-- **HTTP**: axios (reliable API calls)
-- **Validation**: zod (runtime type safety)
-- **Spinner**: ora (user feedback)
-- **Colors**: chalk (terminal styling)
-
-## 📋 Development Roadmap
-
-### Phase 1: Contract Reading (Current)
-- [x] Project setup
-- [x] Sei testnet connection
-- [ ] Contract ABI fetching
-- [ ] Basic type detection
-- [ ] CLI interface
-
-### Phase 2: MCP Integration
-- [ ] MCP server setup
-- [ ] Natural language parsing
-- [ ] Tool definitions
-- [ ] Claude integration
-
-### Phase 3: Advanced Features
-- [ ] Transaction simulation
-- [ ] Safety scanner
-- [ ] Batch operations
-- [ ] TUI interface
-
-## 📁 Project Structure
-
-```
-orbitl/
-├── src/
-│   ├── types/           # TypeScript interfaces
-│   ├── blockchain/      # Sei network connection
-│   ├── core/           # Contract analysis logic
-│   ├── cli/            # Command-line interface
-│   └── utils/          # Utilities (config, cache, logging)
-├── plans/              # Implementation plans
-└── examples/           # Usage examples
-```
-
-## 🧪 Testing
-
-```bash
-# Run with development server
+# Start interactive CLI
 pnpm dev
 
-# Build for production
-pnpm build
-
-# Format code
-pnpm format
+# Direct commands
+npx tsx src/cli.ts lookup USDC
+npx tsx src/cli.ts simulate transfer USDC 100 -f 0x123... -t 0x456...
+npx tsx src/cli.ts validate 0x742d35Cc6665Cb9D9dC69E7A1E15f2fc0C9A3456
 ```
 
-## 🎯 Example Output
+## Demo Commands
 
 ```bash
-$ pnpm dev analyze 0x4fCF1784B31630811181f670Aea7A7bEF803eaED --testnet
+# Look up token addresses
+pnpm tsx src/cli.ts lookup USDC
+pnpm tsx src/cli.ts --network testnet lookup WSEI
 
-✓ Analyzing contract 0x4fCF...eaED
+# Simulate transactions
+pnpm tsx src/cli.ts simulate transfer USDC 100 -f 0x1234567890123456789012345678901234567890 -t 0x742d35Cc6665Cb9D9dC69E7A1E15f2fc0C9A3456
 
-┌─────────────┬────────────────────────────────┐
-│ Property    │ Value                          │
-├─────────────┼────────────────────────────────┤
-│ Address     │ 0x4fCF1784B31630811181f670A... │
-│ Type        │ Token                          │
-│ Verified    │ ✓ Yes                          │
-│ Functions   │ 12 found                       │
-└─────────────┴────────────────────────────────┘
+# Test WalletConnect
+pnpm tsx src/cli.ts wallet
 
-Available Functions:
-• name() → Get token name
-• symbol() → Get token symbol  
-• transfer(to, amount) → Send tokens
-• balanceOf(account) → Check balance
-
-✓ Analysis complete!
+# AI Natural Language (interactive mode)
+pnpm dev
+> "Send 100 USDC to 0x742d35Cc6665Cb9D9dC69E7A1E15f2fc0C9A3456"
 ```
 
-## 🤝 Contributing
+## Architecture
 
-This is a hackathon project for Sei Network AI/Accelathon. See `plans/` directory for detailed implementation plans.
+- `src/core/` - Business logic (contracts, tokens, transactions)
+- `src/intelligence/` - AI integration with 13 specialized tools
+- `src/wallet/` - Transaction building and WalletConnect integration
+- `src/config/` - Network and token configurations
 
-## 📚 Resources
+## Security
 
-- [Sei Network Docs](https://docs.sei.io)
-- [Seitrace Explorer](https://seitrace.com)
-- [Model Context Protocol](https://modelcontextprotocol.io)
-- [Ethers.js Documentation](https://docs.ethers.org/v6/)
-
-## ⚡ Performance Goals
-
-- Contract analysis: < 2 seconds
-- Network connection: < 1 second  
-- ABI fetching: < 3 seconds
-- Type detection: < 100ms
-
----
-
-**Built for Sei Network AI/Accelathon 2025** 🚀
+- Never handles private keys
+- All transactions signed in user's wallet
+- Comprehensive risk assessment
+- Address validation and burn detection
