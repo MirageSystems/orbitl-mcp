@@ -42,6 +42,202 @@ program
     }
   });
 
+// ============================================
+// DIRECT COMMANDS FOR MANUAL TESTING
+// ============================================
+
+// Command: lookup - Find token contract address
+program
+  .command('lookup <input>')
+  .description('Look up token contract address by symbol or verify address')
+  .action(async (input, options, cmd) => {
+    const { getTokenResolver } = await import('./config/token-resolver.js');
+    
+    try {
+      // Get network from global option
+      const network = cmd.parent?.opts().network || 'mainnet';
+      const resolver = getTokenResolver(network as 'mainnet' | 'testnet');
+      const token = await resolver.resolveToken(input);
+      
+      console.log('\n' + resolver.formatTokenInfo(token));
+    } catch (error) {
+      console.log(chalk.red(`\n❌ ${error instanceof Error ? error.message : 'Unknown error'}`));
+    }
+  });
+
+// Command: simulate - Simulate a transaction
+program
+  .command('simulate <type> <token> <amount>')
+  .description('Simulate a transaction (transfer or approve)')
+  .requiredOption('-f, --from <address>', 'From address')
+  .requiredOption('-t, --to <address>', 'To address (recipient or spender)')
+  .action(async (type, token, amount, options, cmd) => {
+    const { TransactionSimulator } = await import('./wallet/transaction-simulator.js');
+    const { SEI_MAINNET_CONFIG, SEI_TESTNET_CONFIG } = await import('./network/sei.js');
+    const { getTokenResolver } = await import('./config/token-resolver.js');
+    
+    try {
+      // Get network from global option
+      const network = cmd.parent?.opts().network || 'mainnet';
+      
+      // Get network config
+      const config = network === 'testnet' ? SEI_TESTNET_CONFIG : SEI_MAINNET_CONFIG;
+      const simulator = new TransactionSimulator(config.rpcUrl);
+      
+      // Resolve token using centralized resolver
+      const resolver = getTokenResolver(network as 'mainnet' | 'testnet');
+      const tokenInfo = await resolver.resolveToken(token);
+      
+      console.log(chalk.blue(`\n🔍 Simulating ${type} on ${network}...`));
+      
+      let result;
+      if (type === 'transfer') {
+        result = await simulator.simulateTransfer(
+          tokenInfo.address,
+          options.from,
+          options.to,
+          amount,
+          tokenInfo.symbol,
+          tokenInfo.decimals
+        );
+      } else if (type === 'approve') {
+        result = await simulator.simulateApproval(
+          tokenInfo.address,
+          options.from,
+          options.to,
+          amount,
+          tokenInfo.symbol
+        );
+      } else {
+        console.log(chalk.red(`❌ Unknown transaction type: ${type}`));
+        console.log(chalk.yellow('Available types: transfer, approve'));
+        return;
+      }
+      
+      console.log(TransactionSimulator.formatSimulation(result));
+    } catch (error) {
+      console.log(chalk.red(`❌ ${error instanceof Error ? error.message : 'Simulation failed'}`));
+    }
+  });
+
+// Command: validate - Validate an address
+program
+  .command('validate <address>')
+  .description('Validate an Ethereum/Sei address')
+  .action(async (address) => {
+    const { TransactionValidator } = await import('./wallet/validator.js');
+    
+    const result = TransactionValidator.validateAddress(address, 'Address');
+    
+    if (result.isValid) {
+      console.log(chalk.green(`\n✅ Valid address: ${address}`));
+    } else {
+      console.log(chalk.red(`\n❌ Invalid address: ${address}`));
+      if (result.errors.length > 0) {
+        console.log(chalk.red('\nErrors:'));
+        result.errors.forEach(e => console.log(`  • ${e}`));
+      }
+    }
+    
+    if (result.warnings.length > 0) {
+      console.log(chalk.yellow('\n⚠️ Warnings:'));
+      result.warnings.forEach(w => console.log(`  • ${w}`));
+    }
+    
+    if (result.suggestions.length > 0) {
+      console.log(chalk.cyan('\n💡 Suggestions:'));
+      result.suggestions.forEach(s => console.log(`  • ${s}`));
+    }
+  });
+
+// Command: wallet - Test WalletConnect
+program
+  .command('wallet')
+  .description('Connect wallet via WalletConnect QR code')
+  .action(async () => {
+    const { WalletConnectFlow } = await import('./wallet/wallet-connect-flow.js');
+    
+    const flow = new WalletConnectFlow();
+    const result = await flow.showQRAndConnect();
+    
+    if (result.success) {
+      console.log(chalk.green('\n✅ Wallet connected successfully!'));
+    } else {
+      console.log(chalk.red(`\n❌ Connection failed: ${result.error}`));
+    }
+  });
+
+// Command: gas - Estimate gas for a transaction
+program
+  .command('gas <operation>')
+  .description('Estimate gas for an operation (transfer, approve, swap)')
+  .action(async (operation) => {
+    const { GasEstimator } = await import('./wallet/gas-estimator.js');
+    const { SEI_MAINNET_CONFIG } = await import('./network/sei.js');
+    const { getTokenResolver } = await import('./config/token-resolver.js');
+    
+    const estimator = new GasEstimator(SEI_MAINNET_CONFIG.rpcUrl);
+    
+    // Build actual transaction data based on operation
+    let txData;
+    const resolver = getTokenResolver('mainnet'); // Use mainnet for gas estimation
+    
+    try {
+      if (operation === 'transfer') {
+        const usdc = await resolver.getTokenBySymbol('USDC');
+        if (usdc) {
+          txData = {
+            to: usdc.address,
+            data: '0xa9059cbb', // transfer function selector
+            value: '0',
+            gasLimit: '65000'
+          };
+        }
+      } else if (operation === 'approve') {
+        const usdc = await resolver.getTokenBySymbol('USDC');
+        if (usdc) {
+          txData = {
+            to: usdc.address,
+            data: '0x095ea7b3', // approve function selector
+            value: '0',
+            gasLimit: '45000'
+          };
+        }
+      }
+      
+      // Fallback for unsupported operations
+      if (!txData) {
+        console.log(chalk.yellow(`⚠️ ${operation} operation not fully implemented for gas estimation`));
+        console.log(chalk.gray('Using ERC-20 transfer estimate as fallback'));
+        
+        const usdc = await resolver.getTokenBySymbol('USDC');
+        txData = {
+          to: usdc?.address || '0xa0b86a33e6441d82f6f7f8e0dc7f2a5e9b9e2c3a',
+          data: '0xa9059cbb',
+          value: '0',
+          gasLimit: '65000'
+        };
+      }
+    } catch (error) {
+      console.log(chalk.red(`❌ Failed to build transaction for gas estimation: ${error}`));
+      return;
+    }
+    
+    try {
+      const estimate = await estimator.estimateTransaction(txData);
+      
+      console.log(chalk.green(`\n⛽ Gas Estimate for ${operation}:`));
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log(`📊 Gas Limit:     ${estimate.gasLimit}`);
+      console.log(`💰 Gas Price:     ${estimate.gasPrice} wei`);
+      console.log(`💵 Estimated Cost: ${estimate.estimatedCost}`);
+      console.log(`🎯 Confidence:    ${estimate.confidence}`);
+      console.log(`🛡️ Buffer:        ${estimate.buffer}%`);
+    } catch (error) {
+      console.log(chalk.red(`❌ Gas estimation failed: ${error}`));
+    }
+  });
+
 // Default action: Start chat interface with recursive tool calling
 program.action(async (options) => {
   try {

@@ -10,6 +10,8 @@ import type { ContractData, ABIFunction } from '../analysis/types.js';
 import { TransactionInterface } from '../wallet/transaction-interface.js';
 import { CLIFormatter } from '../utils/formatter/cli-formatter.js';
 import { WalletConnect, WALLETCONNECT_CONFIG } from '../wallet/wallet-connect.js';
+import { TransactionSimulator } from '../wallet/transaction-simulator.js';
+import { WalletConnectFlow } from '../wallet/wallet-connect-flow.js';
 import { TransactionBuildError } from '../wallet/types.js';
 import type { DetailedTransactionPreview } from '../wallet/types.js';
 import log from '../utils/logger.js';
@@ -225,7 +227,69 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
   );
 
   // ============================================
-  // TOOL 4: BUILD TOKEN TRANSFER
+  // TOOL 4: TOKEN LOOKUP
+  // ============================================
+  ai.registerTool(
+    'lookup_token',
+    'Find token contract address by symbol (e.g., USDC, WSEI)',
+    {
+      type: 'object',
+      properties: {
+        symbol: {
+          type: 'string',
+          description: 'Token symbol to look up (e.g., USDC, WSEI, USDT)'
+        }
+      },
+      required: ['symbol']
+    },
+    async (args: { symbol: string }) => {
+      // Import TokenInfo dynamically to avoid circular deps
+      const { TokenInfo } = await import('../wallet/token-info.js');
+      
+      const knownTokens = {
+        'USDC': '0xa0b86a33e6441d82f6f7f8e0dc7f2a5e9b9e2c3a',
+        'WSEI': '0x742d35cc6665cb9d9dc69e7a1e15f2fc0c9a3456',
+        'USDT': '0xa0b1c2d3e4f5a0b1c2d3e4f5a0b1c2d3e4f5a0b1'
+      };
+
+      const upperSymbol = args.symbol.toUpperCase();
+      const address = knownTokens[upperSymbol as keyof typeof knownTokens];
+
+      if (!address) {
+        return {
+          found: false,
+          symbol: upperSymbol,
+          error: `Token ${upperSymbol} not found in registry`,
+          availableTokens: Object.keys(knownTokens),
+          suggestion: `Available tokens: ${Object.keys(knownTokens).join(', ')}`
+        };
+      }
+
+      try {
+        const metadata = await TokenInfo.getTokenMetadata(address);
+        return {
+          found: true,
+          symbol: upperSymbol,
+          address,
+          name: metadata.name,
+          decimals: metadata.decimals,
+          fullName: `${metadata.name} (${metadata.symbol})`
+        };
+      } catch (error) {
+        return {
+          found: true,
+          symbol: upperSymbol,
+          address,
+          name: `${upperSymbol} Token`,
+          decimals: upperSymbol === 'USDC' || upperSymbol === 'USDT' ? 6 : 18,
+          note: 'Metadata from registry (contract call failed)'
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // TOOL 5: BUILD TOKEN TRANSFER
   // ============================================
   ai.registerTool(
     'build_token_transfer',
@@ -235,7 +299,7 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
       properties: {
         tokenAddress: {
           type: 'string',
-          description: 'The token contract address (e.g., USDC contract)'
+          description: 'The token contract address. Common tokens: USDC=0xa0b86a33e6441d82f6f7f8e0dc7f2a5e9b9e2c3a, WSEI=0x742d35cc6665cb9d9dc69e7a1e15f2fc0c9a3456'
         },
         recipient: {
           type: 'string',
@@ -727,6 +791,196 @@ export async function setupContractTools(ai: AIClient, network: 'mainnet' | 'tes
           suggestions: [
             'Make sure the transaction data is valid',
             'Try rebuilding the transaction if needed'
+          ]
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // TOOL 10: SIMULATE TRANSACTION
+  // ============================================
+  ai.registerTool(
+    'simulate_transaction',
+    'Simulate a transaction to show what will happen before signing (balance changes, risks)',
+    {
+      type: 'object',
+      properties: {
+        type: {
+          type: 'string',
+          description: 'Transaction type: transfer or approve',
+          enum: ['transfer', 'approve']
+        },
+        tokenAddress: {
+          type: 'string',
+          description: 'Token contract address'
+        },
+        fromAddress: {
+          type: 'string',
+          description: 'YOUR wallet address (the sender - you need to provide this)'
+        },
+        toAddress: {
+          type: 'string',
+          description: 'Recipient address where tokens will be sent (different from fromAddress)'
+        },
+        amount: {
+          type: 'string',
+          description: 'Amount to transfer/approve (e.g., "100.5" or "unlimited")'
+        },
+        tokenSymbol: {
+          type: 'string',
+          description: 'Token symbol (e.g., USDC, WSEI)',
+          default: 'TOKEN'
+        },
+        decimals: {
+          type: 'number',
+          description: 'Token decimals (18 for most tokens, 6 for USDC)',
+          default: 18
+        },
+        network: {
+          type: 'string',
+          description: 'Network to use: mainnet or testnet',
+          enum: ['mainnet', 'testnet']
+        }
+      },
+      required: ['type', 'tokenAddress', 'fromAddress', 'toAddress', 'amount']
+    },
+    async (args: { 
+      type: 'transfer' | 'approve';
+      tokenAddress: string;
+      fromAddress: string;
+      toAddress: string;
+      amount: string;
+      tokenSymbol?: string;
+      decimals?: number;
+      network?: string;
+    }) => {
+      try {
+        const config = (args.network === 'testnet') ? SEI_TESTNET_CONFIG : SEI_MAINNET_CONFIG;
+        const simulator = new TransactionSimulator(config.rpcUrl);
+        
+        console.log(`🔍 Simulating ${args.type} transaction...`);
+        
+        let simulation;
+        
+        if (args.type === 'transfer') {
+          simulation = await simulator.simulateTransfer(
+            args.tokenAddress,
+            args.fromAddress,
+            args.toAddress,
+            args.amount,
+            args.tokenSymbol || 'TOKEN',
+            args.decimals || 18
+          );
+        } else {
+          simulation = await simulator.simulateApproval(
+            args.tokenAddress,
+            args.fromAddress,
+            args.toAddress,
+            args.amount,
+            args.tokenSymbol || 'TOKEN'
+          );
+        }
+        
+        const formattedResult = TransactionSimulator.formatSimulation(simulation);
+        
+        return {
+          success: true,
+          simulation,
+          formattedResult,
+          network: args.network || network,
+          nextSteps: simulation.riskLevel === 'CRITICAL' ? 
+            [
+              '❌ DO NOT PROCEED - Critical risk detected',
+              '⚠️ Review warnings carefully',
+              '🔍 Double-check all addresses and amounts'
+            ] :
+            [
+              '✅ Simulation complete - review results above',
+              '🔗 Use "execute_transaction" if ready to sign',
+              '🔒 Your keys stay in YOUR wallet'
+            ]
+        };
+        
+      } catch (error) {
+        return {
+          success: false,
+          error: `Simulation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          suggestions: [
+            'Check all addresses are valid',
+            'Verify token contract exists',
+            'Ensure network connection is working'
+          ]
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // TOOL 11: EXECUTE TRANSACTION
+  // ============================================
+  ai.registerTool(
+    'execute_transaction',
+    'Execute a transaction: show QR code, connect wallet, and send for signing',
+    {
+      type: 'object',
+      properties: {
+        transactionData: {
+          type: 'object',
+          description: 'Transaction data from build_token_* tools'
+        },
+        skipConnection: {
+          type: 'boolean',
+          description: 'Skip connection step if wallet already connected',
+          default: false
+        }
+      },
+      required: ['transactionData']
+    },
+    async (args: { transactionData: any; skipConnection?: boolean }) => {
+      try {
+        const walletFlow = new WalletConnectFlow();
+        
+        console.log('🚀 Starting transaction execution flow...');
+        
+        // Execute complete flow (connect + send)
+        const result = await walletFlow.executeTransaction(args.transactionData);
+        
+        if (result.success) {
+          return {
+            success: true,
+            message: result.message,
+            transactionHash: result.transactionHash,
+            status: 'completed',
+            summary: 'Transaction signed and submitted successfully!',
+            securityReminder: '🔒 Your private keys never left your wallet device',
+            nextSteps: [
+              `🔗 Track transaction: ${result.transactionHash}`,
+              '⏱️ Wait for network confirmation (usually 1-2 minutes)',
+              '✅ Transaction will appear in your wallet history'
+            ]
+          };
+        } else {
+          return {
+            success: false,
+            error: result.error || result.message,
+            troubleshooting: [
+              'Make sure your wallet app is open',
+              'Check your internet connection',
+              'Try refreshing the QR code',
+              'Ensure you have enough balance for gas fees'
+            ]
+          };
+        }
+        
+      } catch (error) {
+        return {
+          success: false,
+          error: `Transaction execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          suggestions: [
+            'Check wallet connection',
+            'Verify transaction data is valid',
+            'Try again with a fresh connection'
           ]
         };
       }

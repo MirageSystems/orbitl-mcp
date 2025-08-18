@@ -113,6 +113,10 @@ export class AIClient {
       
       // Check if the model wants to use tools
       if (result.result.tool_calls && result.result.tool_calls.length > 0) {
+        console.log(`\\n🔧 AI is calling ${result.result.tool_calls.length} tool(s):`);
+        result.result.tool_calls.forEach((call, index) => {
+          console.log(`  ${index + 1}. ${call.name} with args:`, JSON.stringify(call.arguments, null, 2));
+        });
         log.info(`\\n🔧 AI is calling ${result.result.tool_calls.length} tool(s):`);
         
         // Execute all tool calls
