@@ -57,11 +57,13 @@ export class TrezorWallet implements HardwareWallet {
     }
 
     try {
+      const { ethers } = await import('ethers');
+      
       const result = await this.TrezorConnect.ethereumSignTransaction({
         path: path,
         transaction: {
           to: tx.to,
-          value: tx.value,
+          value: ethers.toBeHex(tx.value),
           data: tx.data,
           gasLimit: tx.gasLimit,
           gasPrice: tx.gasPrice,
@@ -73,8 +75,6 @@ export class TrezorWallet implements HardwareWallet {
       if (!result.success) {
         throw new Error(result.payload.error);
       }
-
-      const { ethers } = await import('ethers');
       
       const signedTx = ethers.Transaction.from({
         to: tx.to,
