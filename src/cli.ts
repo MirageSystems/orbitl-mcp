@@ -167,6 +167,92 @@ program
     }
   });
 
+// Command: hardware - Hardware wallet operations
+program
+  .command('hardware')
+  .description('Hardware wallet operations (Ledger/Trezor)')
+  .option('-t, --type <type>', 'Wallet type (ledger|trezor)')
+  .option('-a, --action <action>', 'Action (connect|address|sign)', 'connect')
+  .action(async (options) => {
+    const { HardwareWalletManager } = await import('./hardware/hardware.js');
+    
+    const manager = new HardwareWalletManager();
+    
+    try {
+      if (options.action === 'connect') {
+        const spinner = ora('Detecting hardware wallets...').start();
+        const available = await manager.detectWallets();
+        spinner.stop();
+        
+        if (available.length === 0) {
+          console.log(chalk.yellow('\n⚠️  No hardware wallets detected'));
+          console.log(chalk.gray('Make sure your device is:'));
+          console.log(chalk.gray('  • Connected via USB'));
+          console.log(chalk.gray('  • Unlocked with PIN'));
+          console.log(chalk.gray('  • Has the Ethereum app open (Ledger)'));
+          console.log(chalk.gray('\n💡 To test the implementation:'));
+          console.log(chalk.gray('  • Connect a Ledger/Trezor device'));
+          console.log(chalk.gray('  • Run: orbitl hardware --type ledger --action sign'));
+          return;
+        }
+        
+        console.log(chalk.green(`\n✅ Found hardware wallets: ${available.join(', ')}`));
+        
+        for (const walletType of available) {
+          const wallet = manager.getWallet(walletType);
+          if (wallet) {
+            try {
+              const info = await wallet.getDeviceInfo();
+              const address = await wallet.getAddress("m/44'/60'/0'/0/0");
+              
+              console.log(chalk.blue(`\n🔐 ${walletType.toUpperCase()} Wallet:`));
+              console.log(`  Model: ${info.model}`);
+              console.log(`  Version: ${info.version}`);
+              console.log(`  Address: ${address}`);
+            } catch (error) {
+              console.log(chalk.red(`❌ Failed to get ${walletType} info: ${error instanceof Error ? error.message : 'Unknown error'}`));
+            }
+          }
+        }
+      } else if (options.action === 'sign' && options.type) {
+        const { SafeTransactionBuilder } = await import('./wallet/transaction-builder.js');
+        const { getTokenResolver } = await import('./config/token-resolver.js');
+        
+        const spinner = ora(`Preparing transaction for ${options.type}...`).start();
+        
+        const builder = new SafeTransactionBuilder('https://evm-rpc.sei-apis.com', 'mainnet');
+        const resolver = getTokenResolver('mainnet');
+        const usdc = await resolver.getTokenBySymbol('USDC');
+        
+        if (!usdc) {
+          spinner.fail('USDC token not found');
+          return;
+        }
+        
+        const transaction = await builder.buildTransfer(
+          usdc.address,
+          '0x742d35cc6634c0532925a3b8c5dd65e1e5f5c8c5',
+          '1.0'
+        );
+        
+        spinner.text = 'Please confirm on device...';
+        
+        try {
+          const signedTx = await manager.signWithHardware(options.type as any, transaction.transaction);
+          spinner.succeed('Transaction signed successfully!');
+          
+          console.log(chalk.green('\n✅ Signed Transaction:'));
+          console.log(chalk.gray(signedTx.slice(0, 100) + '...'));
+          console.log(chalk.yellow('\n💡 You can now broadcast this transaction'));
+        } catch (error) {
+          spinner.fail(`Signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+    } catch (error) {
+      console.log(chalk.red(`❌ Hardware wallet error: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    }
+  });
+
 // Command: gas - Estimate gas for a transaction
 program
   .command('gas <operation>')

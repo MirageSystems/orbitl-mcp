@@ -40,7 +40,10 @@
     "@walletconnect/core": "^2.21.8",
     "@walletconnect/sign-client": "^2.21.8",
     "@walletconnect/utils": "^2.21.8",
-    "qrcode-terminal": "^0.12.0"
+    "qrcode-terminal": "^0.12.0",
+    "@ledgerhq/hw-transport-node-hid": "^6.29.0",
+    "@ledgerhq/hw-app-eth": "^6.38.0",
+    "@trezor/connect": "^9.4.0"
   },
   "devDependencies": {
     "@types/figlet": "^1.7.0",

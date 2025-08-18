@@ -1,0 +1,96 @@
+import { ethers } from 'ethers';
+import type { TransactionData } from '../wallet/types.js';
+
+export interface HardwareWallet {
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  getAddress(path: string): Promise<string>;
+  signTransaction(tx: UnsignedTransaction, path: string): Promise<string>;
+  isConnected(): boolean;
+  getDeviceInfo(): Promise<DeviceInfo>;
+}
+
+export interface UnsignedTransaction {
+  to: string;
+  data: string;
+  value: string;
+  gasLimit: string;
+  gasPrice: string;
+  nonce: number;
+  chainId: number;
+}
+
+export interface DeviceInfo {
+  model: string;
+  version: string;
+  deviceId: string;
+}
+
+export type WalletType = 'ledger' | 'trezor';
+
+export class HardwareWalletManager {
+  private wallets: Map<WalletType, HardwareWallet> = new Map();
+
+  async detectWallets(): Promise<WalletType[]> {
+    const available: WalletType[] = [];
+    
+    try {
+      const { LedgerWallet } = await import('./ledger.js');
+      const ledger = new LedgerWallet();
+      await ledger.connect();
+      this.wallets.set('ledger', ledger);
+      available.push('ledger');
+      console.log('✅ Ledger wallet detected');
+    } catch (error) {
+      console.log(`❌ Ledger not available: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    try {
+      const { TrezorWallet } = await import('./trezor.js');
+      const trezor = new TrezorWallet();
+      await trezor.connect();
+      this.wallets.set('trezor', trezor);
+      available.push('trezor');
+      console.log('✅ Trezor wallet detected');
+    } catch (error) {
+      console.log(`❌ Trezor not available: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    return available;
+  }
+
+  getWallet(type: WalletType): HardwareWallet | undefined {
+    return this.wallets.get(type);
+  }
+
+  async signWithHardware(
+    type: WalletType,
+    transaction: TransactionData,
+    path: string = "m/44'/60'/0'/0/0"
+  ): Promise<string> {
+    const wallet = this.getWallet(type);
+    if (!wallet) {
+      throw new Error(`${type} wallet not available`);
+    }
+
+    const nonce = await this.getNonce(transaction.to);
+    const chainId = 1329; // Sei Pacific-1
+
+    const unsignedTx: UnsignedTransaction = {
+      to: transaction.to,
+      data: transaction.data,
+      value: transaction.value,
+      gasLimit: transaction.gasLimit || '65000',
+      gasPrice: transaction.gasPrice || '10000000000',
+      nonce,
+      chainId
+    };
+
+    return await wallet.signTransaction(unsignedTx, path);
+  }
+
+  private async getNonce(address: string): Promise<number> {
+    const provider = new ethers.JsonRpcProvider('https://evm-rpc.sei-apis.com');
+    return await provider.getTransactionCount(address);
+  }
+}
