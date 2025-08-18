@@ -31,33 +31,37 @@ export type WalletType = 'ledger' | 'trezor';
 export class HardwareWalletManager {
   private wallets: Map<WalletType, HardwareWallet> = new Map();
 
-  async detectWallets(): Promise<WalletType[]> {
-    const available: WalletType[] = [];
-    
-    try {
-      const { LedgerWallet } = await import('./ledger.js');
-      const ledger = new LedgerWallet();
-      await ledger.connect();
-      this.wallets.set('ledger', ledger);
-      available.push('ledger');
-      console.log('✅ Ledger wallet detected');
-    } catch (error) {
-      console.log(`❌ Ledger not available: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+async detectWallets(): Promise<WalletType[]> {
+  const available: WalletType[] = [];
 
-    try {
-      const { TrezorWallet } = await import('./trezor.js');
-      const trezor = new TrezorWallet();
-      await trezor.connect();
-      this.wallets.set('trezor', trezor);
-      available.push('trezor');
-      console.log('✅ Trezor wallet detected');
-    } catch (error) {
-      console.log(`❌ Trezor not available: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-
-    return available;
+  try {
+    const { LedgerWallet } = await import('./ledger.js');
+    const ledger = new LedgerWallet();
+    await ledger.connect();
+    // Verify device presence by fetching a default address
+    await ledger.getAddress("m/44'/60'/0'/0/0");
+    this.wallets.set('ledger', ledger);
+    available.push('ledger');
+    console.log('✅ Ledger wallet detected');
+  } catch (error) {
+    console.log(`❌ Ledger not available: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+
+  try {
+    const { TrezorWallet } = await import('./trezor.js');
+    const trezor = new TrezorWallet();
+    await trezor.connect();
+    // Verify device presence by fetching a default address
+    await trezor.getAddress("m/44'/60'/0'/0/0");
+    this.wallets.set('trezor', trezor);
+    available.push('trezor');
+    console.log('✅ Trezor wallet detected');
+  } catch (error) {
+    console.log(`❌ Trezor not available: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
+  return available;
+}
 
   getWallet(type: WalletType): HardwareWallet | undefined {
     return this.wallets.get(type);
