@@ -26,9 +26,11 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.3",
     "chalk": "^5.5.0",
     "cli-table3": "^0.6.5",
     "commander": "^14.0.0",
+    "dotenv": "^17.2.1",
     "ethers": "6",
     "ora": "^8.2.0"
   },

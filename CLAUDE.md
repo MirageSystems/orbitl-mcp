@@ -8,6 +8,30 @@
 **Timeline:** 10 days (Due: August 25, 2025)  
 **Primary Goal:** Win the hackathon by building a natural language interface for smart contract interaction
 
+## 🔐 **CRITICAL: "WE NEVER TOUCH YOUR KEYS" ARCHITECTURE**
+
+### 🏆 **Our Killer Differentiator**
+**"We NEVER Touch Your Keys"** - This is our winning edge. While other tools compromise security by asking for private keys, Orbitl keeps users safe by NEVER handling private key material.
+
+### 🛡️ **Security-First Principles**
+
+#### **NEVER**:
+- ❌ Ask for private keys
+- ❌ Request seed phrases  
+- ❌ Store wallet credentials
+- ❌ Handle mnemonic phrases
+- ❌ Access wallet files
+- ❌ Sign transactions directly
+
+#### **ALWAYS**:
+- ✅ Generate transaction data only
+- ✅ Let users sign with their own wallets
+- ✅ Support hardware wallets (Ledger/Trezor)
+- ✅ Use WalletConnect for safe connections
+- ✅ Provide clear transaction previews
+- ✅ Enable simulation before execution
+- ✅ Show gas estimates and safety warnings
+
 ## 🚦 Development Rules
 
 ### CRITICAL: Collaboration Protocol
@@ -63,39 +87,47 @@
 3. Advanced pattern recognition
 4. Community trust scores
 
-## 🏗️ Technical Architecture
+## 🏗️ **Wallet-Safe Technical Architecture**
 
-### Project Structure
+### Current Implementation (Phase 1 & 2 Complete ✅)
 ```
 orbitl/
 ├── src/
 │   ├── cli/
-│   │   ├── index.ts          # Entry point
-│   │   ├── commands.ts       # CLI command handlers
-│   │   └── ui.ts            # TUI components
+│   │   └── index.ts          # Entry point with chat-first UX
 │   ├── core/
-│   │   ├── analyzer.ts      # Contract analysis engine
-│   │   ├── scanner.ts       # Safety scanner
-│   │   ├── translator.ts    # ABI to human language
-│   │   └── patterns.ts      # Contract pattern matching
+│   │   ├── contract-reader.ts # Contract analysis engine
+│   │   └── (scanner.ts)      # 🔜 Safety scanner & risk assessment
+│   ├── chat/
+│   │   ├── interface.ts      # Interactive chat with AI
+│   │   └── conversation.ts   # Conversation management
 │   ├── mcp/
-│   │   ├── server.ts        # MCP server setup
-│   │   ├── tools.ts         # MCP tool definitions
-│   │   └── parser.ts        # Intent parsing
+│   │   └── server.ts         # MCP server with contract tools
+│   ├── ai/
+│   │   └── cloudflare-client.ts # Cloudflare AI integration
 │   ├── blockchain/
-│   │   ├── sei.ts           # Sei network connection
-│   │   ├── contracts.ts     # Contract interaction
-│   │   └── transactions.ts  # Transaction builder
-│   └── utils/
-│       ├── cache.ts         # ABI caching
-│       ├── logger.ts        # Logging utility
-│       └── config.ts        # Configuration
+│   │   └── sei-provider.ts   # READ-ONLY Sei network connection
+│   ├── types/
+│   │   └── contract.ts       # Type definitions
+│   └── utils/               # Configuration utilities
 ├── examples/
-│   └── demo-contracts.json  # Pre-loaded contracts for demo
-├── package.json
-├── tsconfig.json
-├── README.md
-└── .env.example
+├── package.json             # Current: ethers@6, commander, etc.
+├── tsconfig.json           # Strict TypeScript configuration
+└── README.md               # Battle-tested libs documentation
+```
+
+### 🔜 **Phase 3: Wallet-Safe Transaction Mode**
+```
+├── src/
+│   ├── wallet/              # 🆕 ZERO private key handling
+│   │   ├── transaction-builder.ts # 🔒 Build tx data only
+│   │   ├── wallet-connect.ts      # 🔒 WalletConnect integration  
+│   │   ├── hardware.ts            # 🔒 Ledger/Trezor support
+│   │   ├── preview.ts             # Transaction preview & simulation
+│   │   └── safety-checks.ts       # Pre-execution safety validation
+│   ├── core/
+│   │   ├── safety-scanner.ts      # Advanced risk assessment
+│   │   └── transaction-simulator.ts # Simulate before execute
 ```
 
 ### Tech Stack
@@ -141,31 +173,44 @@ export class ContractAnalyzer {
 }
 ```
 
-### Phase 2: MCP Integration (Days 3-4)
+### Phase 2: MCP Integration (Days 3-4) ✅ COMPLETE
 ```typescript
-// 3. src/mcp/server.ts
-export class MCPServer {
-  async start()
-  registerTools()
-  handleRequest(request: MCPRequest)
+// ✅ src/mcp/server.ts 
+export class OrbitlMCPServer {
+  // MCP server with contract analysis tools
 }
 
-// 4. src/mcp/tools.ts
-export const tools = {
-  analyzeContract: /* MCP tool definition */,
-  executeFunction: /* MCP tool definition */,
-  checkSafety: /* MCP tool definition */
+// ✅ src/ai/cloudflare-client.ts
+export class CloudflareAI {
+  // Llama 3.1 8B Instruct integration
+}
+
+// ✅ src/chat/interface.ts
+export class ChatInterface {
+  // Interactive chat with AI + conversation history
 }
 ```
 
-### Phase 3: CLI Interface (Days 5-6)
+### Phase 3: Wallet-Safe Transaction Builder (Days 5-6) 🔜 NEXT
 ```typescript
-// 5. src/cli/index.ts
-commander
-  .command('analyze <address>')
-  .command('execute <address>')
-  .command('scan <address>')
-  .option('--paper', 'Paper mode (no real transactions)')
+// 🔜 src/wallet/transaction-builder.ts
+export class SafeTransactionBuilder {
+  buildTransaction(contractCall: ContractCall): TransactionData
+  // NEVER signs - only builds data for external signing
+}
+
+// 🔜 src/wallet/wallet-connect.ts  
+export class WalletConnectIntegration {
+  connectWallet(): Promise<WalletConnection>
+  sendTransactionForSigning(txData: TransactionData): Promise<SignedTx>
+  // NEVER accesses private keys
+}
+
+// 🔜 src/core/safety-scanner.ts
+export class SafetyScanner {
+  scanContract(address: string): Promise<RiskAssessment>
+  validateTransaction(txData: TransactionData): SafetyReport
+}
 ```
 
 ### Phase 4: Polish (Days 7-8)
@@ -222,31 +267,42 @@ function assessRisk(func: ABIFunction): RiskLevel {
 }
 ```
 
-## 🎮 Demo Scenarios
+## 🎮 Demo Scenarios (Wallet-Safe Approach)
 
-### Scenario 1: Save User from Scam (30 seconds)
+### Scenario 1: Save User from Scam (30 seconds) 🛡️
 ```bash
 $ orbitl
 > "Check 0x666..." 
-[Shows WARNING - scam contract]
+🚨 WARNING: Unverified contract detected
+❌ Risk Level: CRITICAL - Do not interact
 > "What should I use instead?"
-[Shows safe alternatives]
+✅ Safe alternatives: [Lists verified DEXs]
+🔒 Your keys stay in YOUR wallet - we never ask for them
 ```
 
-### Scenario 2: Claim All Rewards (20 seconds)
+### Scenario 2: Safe Transaction Building (25 seconds) 🔒
 ```bash
-> "Find all my unclaimed rewards"
-[Lists rewards across protocols]
-> "Claim everything"
-[One-click claim all]
+> "I want to stake 100 SEI on 0xDragonSwap"
+🔍 Analyzing contract... ✅ Verified DEX found
+💰 Building stake transaction for 100 SEI
+📋 Transaction preview:
+   • Contract: DragonSwap LP Staking
+   • Function: stake(100000000000000000000)
+   • Gas estimate: ~50,000 SEI
+   • Safety: ✅ Low risk
+🔗 Connect your wallet to sign (WalletConnect/Hardware)
+[Never asks for private keys - YOU sign in YOUR wallet]
 ```
 
-### Scenario 3: Understand Complex DeFi (25 seconds)
+### Scenario 3: Wallet-Safe Analysis (20 seconds) 🔍
 ```bash
-> "Explain what I can do with 0xDragonSwap"
-[Human-friendly explanation of LP staking]
-> "Stake 100 SEI"
-[Transaction preview and execution]
+> "Analyze 0xSomeContract"
+🔍 Contract Analysis:
+   ✅ Verified on Seitrace
+   💰 Token contract (DRAGON)
+   🔒 Standard ERC-20 functions
+   ⚠️  High-risk functions: approve() - be careful with amounts
+🔒 Analysis complete - your wallet never exposed
 ```
 
 ## 🚀 Quick Start Commands
@@ -285,12 +341,24 @@ pnpm tsc
 4. **No demo prep**: Practice the demo 20+ times
 5. **Forgetting safety**: Never execute without user confirmation
 
-## 🎯 Winning Strategy
+## 🎯 **Security-First Winning Strategy**
 
-1. **Days 1-5**: Build solid MVP that actually works
-2. **Days 6-8**: Polish and add wow factor
-3. **Day 9**: Demo preparation and testing
-4. **Day 10**: Final submission and video
+### **Our Unique Value Proposition**
+🔒 **"We NEVER Touch Your Keys"** - The only smart contract tool that prioritizes user security above all else.
+
+### **Implementation Timeline**
+1. **Days 1-4**: ✅ **COMPLETE** - Chat-first analysis with AI (NO transactions)
+2. **Days 5-6**: 🔜 **NEXT** - Wallet-safe transaction builder (Preview only)
+3. **Days 7-8**: **Polish** - WalletConnect + Hardware wallet support
+4. **Day 9**: **Demo** - Emphasize security advantage
+5. **Day 10**: **Submission** - "Safest smart contract tool in crypto"
+
+### **Competitive Advantages for Judges**
+1. 🛡️ **Security**: Never compromises user safety
+2. 🤖 **AI-First**: Natural language that actually works  
+3. ⚡ **Performance**: Instant contract analysis
+4. 🎯 **User Experience**: Chat interface like Claude Code
+5. 🏗️ **Architecture**: Enterprise-ready security model
 
 ## 📚 Resources
 
@@ -309,10 +377,21 @@ Before implementing any major component:
 4. Implement
 5. Test and iterate
 
-**Remember**: This is a hackathon. Speed matters, but a working demo matters more. Build something that impresses in 30 seconds.
+**Remember**: This is a hackathon. Security + Speed = Victory. Build something that impresses judges AND keeps users safe.
 
 ---
 
-**LET'S BUILD SOMETHING AMAZING! 🚀**
+## 🔐 **SECURITY COMMITMENT**
 
-When you're ready, say "Ready to start Phase 1" and we'll begin with the foundation.
+**"We NEVER Touch Your Keys"** is not just a feature - it's our core philosophy. Every line of code, every architecture decision, every user interaction is designed around this principle.
+
+### **Why This Wins the Hackathon**
+- 🥇 **Judges Value Security**: Demonstrates enterprise-level security thinking
+- 🥇 **User Trust**: Addresses #1 crypto concern (private key safety)  
+- 🥇 **Technical Innovation**: Wallet-safe architecture is cutting-edge
+- 🥇 **Real-world Ready**: Production-ready security model
+- 🥇 **Competitive Differentiation**: No other tool prioritizes this
+
+**LET'S BUILD THE SAFEST, SMARTEST CONTRACT TOOL! 🚀🔒**
+
+Current Status: Phase 1 & 2 Complete ✅ | Next: Wallet-Safe Transaction Builder 🔜

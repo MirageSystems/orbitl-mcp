@@ -126,3 +126,6 @@ Desktop.ini
 # Cache
 .cache/
 cache/
+
+# Orbitl user data (conversations should not be committed)
+.orbitl/

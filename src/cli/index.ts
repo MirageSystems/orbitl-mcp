@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 
-// Phase 1: CLI Interface - Battle-tested implementation
-// Using commander.js, cli-table3, ora, chalk
+/**
+ * @fileoverview Orbitl - Smart Contract AI Assistant for Sei Network
+ * Main CLI entry point with chat-first interface and MCP integration
+ * @author Orbitl Team
+ */
+
+// Load environment variables from .env file
+import 'dotenv/config';
 
 import { Command } from "commander";
 import chalk from "chalk";
@@ -11,32 +17,66 @@ import { SeiProvider, SEI_TESTNET_CONFIG, SEI_MAINNET_CONFIG } from "../blockcha
 import { ContractReader } from "../core/contract-reader.js";
 import { formatAddress } from "../types/contract.js";
 import type { ContractData, ABIFunction } from "../types/contract.js";
+import { ChatInterface } from "../chat/interface.js";
 
 const program = new Command();
 
 // CLI Setup
 program
   .name("orbitl")
-  .description("Natural language interface for Sei smart contract interaction")
-  .version("1.0.0");
+  .description("Smart Contract AI Assistant for Sei Network")
+  .version("1.0.0")
+  .option('-n, --network <network>', 'Network to use (mainnet|testnet)', 'mainnet')
+  .option('-c, --continue', 'Continue previous conversation')
+  .option('-v, --verbose', 'Show detailed analysis data')
+  .hook('preAction', (thisCommand, actionCommand) => {
+    // Validate network option
+    const network = thisCommand.opts().network;
+    if (!['mainnet', 'testnet'].includes(network)) {
+      console.error(chalk.red('❌ Network must be "mainnet" or "testnet"'));
+      process.exit(1);
+    }
+  });
+
+// Default action: Start chat interface
+program.action(async (options) => {
+  try {
+    const chat = new ChatInterface({
+      network: options.network,
+      continue: options.continue,
+      verbose: options.verbose
+    });
+    await chat.start();
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('CLOUDFLARE')) {
+      console.error(chalk.red(error.message));
+      console.log(chalk.gray('\n💡 Set up your Cloudflare AI credentials:'));
+      console.log(chalk.gray('   export CLOUDFLARE_API_TOKEN="your_token"'));
+      console.log(chalk.gray('   export CLOUDFLARE_ACCOUNT_ID="your_account_id"'));
+    } else {
+      console.error(chalk.red(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    }
+    process.exit(1);
+  }
+});
 
 /**
- * Analyze Command - Main functionality
+ * Analyze Command - Direct contract analysis (non-interactive)
  */
 program
   .command("analyze")
   .alias("a")
-  .description("Analyze a smart contract")
+  .description("Analyze a smart contract (non-interactive)")
   .argument("<address>", "Contract address to analyze")
-  .option("-t, --testnet", "Use Sei testnet (default is mainnet)")
-  .option("-m, --mainnet", "Use Sei mainnet (default)")
   .option("-d, --detailed", "Show detailed function list")
-  .action(async (address: string, options: { testnet?: boolean; mainnet?: boolean; detailed?: boolean }) => {
+  .action(async (address: string, options: { detailed?: boolean }, command: Command) => {
     const spinner = ora("Analyzing contract...").start();
     
     try {
-      // Initialize provider based on network (mainnet is default)
-      const config = options.testnet ? SEI_TESTNET_CONFIG : SEI_MAINNET_CONFIG;
+      // Use global network option
+      const globalOptions = command.parent?.opts() || {};
+      const network = globalOptions.network || 'mainnet';
+      const config = network === 'testnet' ? SEI_TESTNET_CONFIG : SEI_MAINNET_CONFIG;
       const provider = new SeiProvider(config);
       const reader = new ContractReader(provider);
 
@@ -75,13 +115,14 @@ program
   .command("check")
   .alias("c")
   .description("Check connection to Sei network")
-  .option("-t, --testnet", "Check testnet connection (default is mainnet)")
-  .option("-m, --mainnet", "Check mainnet connection (default)")
-  .action(async (options: { testnet?: boolean; mainnet?: boolean }) => {
+  .action(async (options: {}, command: Command) => {
     const spinner = ora("Checking network connection...").start();
     
     try {
-      const config = options.testnet ? SEI_TESTNET_CONFIG : SEI_MAINNET_CONFIG;
+      // Use global network option
+      const globalOptions = command.parent?.opts() || {};
+      const network = globalOptions.network || 'mainnet';
+      const config = network === 'testnet' ? SEI_TESTNET_CONFIG : SEI_MAINNET_CONFIG;
       const provider = new SeiProvider(config);
       
       const { blockNumber, networkName } = await provider.checkConnection();
@@ -202,7 +243,10 @@ function displayTypeSpecificInfo(contractData: ContractData) {
   }
 }
 
-// Global error handlers
+/**
+ * Global error handlers for uncaught exceptions
+ * Note: Chat interface has its own error handlers for auto-save
+ */
 process.on("uncaughtException", (error) => {
   console.error(chalk.red("\n💥 Unexpected error occurred:"));
   console.error(error.message);
@@ -215,11 +259,7 @@ process.on("unhandledRejection", (reason) => {
   process.exit(1);
 });
 
-// Show help if no arguments provided
-if (!process.argv.slice(2).length) {
-  program.outputHelp();
-  process.exit(0); // Exit gracefully
-}
+// Note: Removed auto-help - default action now starts chat
 
 // Parse CLI arguments
 program.parse();
