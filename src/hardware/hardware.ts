@@ -77,8 +77,11 @@ async detectWallets(): Promise<WalletType[]> {
       throw new Error(`${type} wallet not available`);
     }
 
-    const nonce = await this.getNonce(transaction.to);
-    const chainId = 1329; // Sei Pacific-1
+    // Derive sender from the hardware path and query nonce/chainId from RPC
+    const fromAddress = await wallet.getAddress(path);
+    const provider = new ethers.JsonRpcProvider('https://evm-rpc.sei-apis.com');
+    const nonce = await provider.getTransactionCount(fromAddress);
+    const { chainId } = await provider.getNetwork();
 
     const unsignedTx: UnsignedTransaction = {
       to: transaction.to,
