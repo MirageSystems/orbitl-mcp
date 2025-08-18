@@ -207,12 +207,15 @@ export class WalletConnect extends EventEmitter {
       throw new Error("Wallet not connected");
     }
 
+    const from = transaction.from ?? this.connectionState.account;
+    if (!from) throw new Error("No connected account for transaction");
+    const tx = { ...transaction, from };
     const result = await this.signClient.request({
       topic: this.connectionState.sessionTopic,
       chainId: `eip155:${this.connectionState.chainId}`,
       request: {
         method: "eth_sendTransaction",
-        params: [transaction],
+        params: [tx],
       },
     });
 
