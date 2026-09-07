@@ -60,4 +60,4 @@ The title and expected body come from the same report. Shared wording can inflat
 
 The sample was used to choose an implementation and is therefore a development benchmark. It is not an untouched acceptance set. There are no independent human relevance judgments, audit verdicts, or model comparisons in these results.
 
-BTC manual validation is pending. A later evaluation needs independently validated dispositions, project-level exclusions, fixed source revisions, and a comparison of assessment with and without references. Increased assertiveness alone is not success.
+Human verdict validation is pending. A later evaluation needs independently validated dispositions, project-level exclusions, fixed source revisions, and a comparison of assessment with and without references. Increased assertiveness alone is not success.

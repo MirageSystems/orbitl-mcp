@@ -1,6 +1,6 @@
 # MCP setup
 
-Orbitl serves historical audit references from an existing local SQLite index. Use it during review of an existing concern, including Codex's consolidation of an OpenKritt report. The host model assesses the evidence and returned references. Orbitl does not run that model.
+Orbitl serves historical audit references from an existing local SQLite index. Use it during review of an existing concern, including consolidation of another audit report. The host model assesses the evidence and returned references. Orbitl does not run that model.
 
 ## Prepare the server
 
@@ -65,7 +65,7 @@ For clients that accept an `mcpServers` JSON configuration:
 
 Use the configuration location documented by your client. A container or remote host needs the compiled server, Node runtime, and index available inside that environment. A path on your laptop is not automatically accessible there.
 
-OpenKritt can remain the first review pass in your workflow. This change provides a standard MCP connection for the consolidation host; it does not modify OpenKritt or install a Web3 security skill.
+Your existing review tool can remain the first pass in the workflow. Connect Orbitl to the MCP host that consolidates the reports, alongside any installed security-review skill.
 
 ## Review flow
 

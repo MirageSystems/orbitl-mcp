@@ -54,7 +54,7 @@ Search for historical material after a reviewer has an existing concern or quest
 
 `review_with_references` packages the concern, supplied evidence, and five search results for the host model. It does not validate a finding. Similarity scores are lexical ranking values, historical severity does not set current severity, and historical text cannot replace evidence from the reviewed source.
 
-The recorded 200-query diagnostic retrieved the source finding in the top five for 76% of title queries. This is a development known-item test, not a measure of semantic relevance or audit accuracy. See [benchmark methods and results](benchmarks/README.md). BTC manual validation and a project-held-out comparison with human judgments remain pending.
+The recorded 200-query diagnostic retrieved the source finding in the top five for 76% of title queries. This is a development known-item test, not a measure of semantic relevance or audit accuracy. See [benchmark methods and results](benchmarks/README.md). Human verdict validation and a project-held-out comparison with human judgments remain pending.
 
 ## Direct reference CLI
 

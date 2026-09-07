@@ -46,6 +46,6 @@ The runtime retrieval and MCP code use strict functional TypeScript and readonly
 
 ## Existing limitations
 
-The lexical backend does not use embeddings, understand the current codebase, or establish semantic relevance. The provisional known-item benchmark does not measure audit accuracy. BTC manual validation and a project-held-out evaluation remain open.
+The lexical backend does not use embeddings, understand the current codebase, or establish semantic relevance. The provisional known-item benchmark does not measure audit accuracy. Human verdict validation and a project-held-out evaluation remain open.
 
 Sei analysis uses ABI shape and function names. Published ABI status does not establish security. Transaction encoding and gas estimation contain mock behavior. The chat client has a depth-three tool cap and limited in-memory history. This work does not establish live-provider or wallet correctness.
