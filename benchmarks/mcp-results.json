@@ -1,0 +1,841 @@
+{
+  "benchmark": "mcp-known-item-v1",
+  "createdAt": "2026-09-07T23:31:46.074Z",
+  "harnessSha256": "b68aede3571bac39b710a1776adcb56f94b998ec49814e68de5bb7aa95bb0bcc",
+  "lockfileSha256": "11792554f15d8cb6d73bdb05dada7d5101061f79f6e1d512feba4f310b1ede39",
+  "node": "v24.0.0",
+  "protocol": "legacy initialize with official SDK v2 client",
+  "datasetSha256": "25364c90b666820a8e45c64164f294a407db3dc9d51fece02b4b5b4e08c495ed",
+  "implementationSha256": "a355601d5991da67c6b80d029868623c8ab57d2991dc80f9dcb37a7ca7a56bf6",
+  "sourceFiles": [
+    "src/retrieval/store.ts",
+    "src/retrieval/findings.ts",
+    "src/mcp/context.ts",
+    "src/mcp/server.ts",
+    "src/mcp/cli.ts"
+  ],
+  "queryCount": 200,
+  "starts": [
+    {
+      "initializeMs": 77.13483300000001,
+      "initializeAndFirstSearchMs": 93.906
+    },
+    {
+      "initializeMs": 81.21487500000012,
+      "initializeAndFirstSearchMs": 87.02495900000031
+    },
+    {
+      "initializeMs": 75.09237499999972,
+      "initializeAndFirstSearchMs": 80.79374999999982
+    }
+  ],
+  "warmCalls": 600,
+  "warmP50Ms": 3.563000000000102,
+  "warmP95Ms": 8.17337499999985,
+  "maxResultBytes": 48334,
+  "hitAt5": 0.76,
+  "hitAt10": 0.8,
+  "ranks": [
+    {
+      "findingId": 22537,
+      "rank": 1
+    },
+    {
+      "findingId": 10307,
+      "rank": 1
+    },
+    {
+      "findingId": 1805,
+      "rank": 1
+    },
+    {
+      "findingId": 4263,
+      "rank": 1
+    },
+    {
+      "findingId": 14272,
+      "rank": 1
+    },
+    {
+      "findingId": 6192,
+      "rank": 1
+    },
+    {
+      "findingId": 5586,
+      "rank": null
+    },
+    {
+      "findingId": 14708,
+      "rank": 3
+    },
+    {
+      "findingId": 15759,
+      "rank": 7
+    },
+    {
+      "findingId": 1915,
+      "rank": null
+    },
+    {
+      "findingId": 10207,
+      "rank": 1
+    },
+    {
+      "findingId": 12412,
+      "rank": 1
+    },
+    {
+      "findingId": 15689,
+      "rank": null
+    },
+    {
+      "findingId": 6682,
+      "rank": 1
+    },
+    {
+      "findingId": 9560,
+      "rank": null
+    },
+    {
+      "findingId": 12916,
+      "rank": 1
+    },
+    {
+      "findingId": 13651,
+      "rank": null
+    },
+    {
+      "findingId": 175,
+      "rank": 1
+    },
+    {
+      "findingId": 18643,
+      "rank": 1
+    },
+    {
+      "findingId": 13539,
+      "rank": 4
+    },
+    {
+      "findingId": 15531,
+      "rank": 4
+    },
+    {
+      "findingId": 5987,
+      "rank": 1
+    },
+    {
+      "findingId": 13655,
+      "rank": null
+    },
+    {
+      "findingId": 2343,
+      "rank": 1
+    },
+    {
+      "findingId": 21930,
+      "rank": 1
+    },
+    {
+      "findingId": 10316,
+      "rank": 10
+    },
+    {
+      "findingId": 826,
+      "rank": null
+    },
+    {
+      "findingId": 9065,
+      "rank": 1
+    },
+    {
+      "findingId": 17000,
+      "rank": 1
+    },
+    {
+      "findingId": 17668,
+      "rank": 1
+    },
+    {
+      "findingId": 18336,
+      "rank": 2
+    },
+    {
+      "findingId": 4195,
+      "rank": 1
+    },
+    {
+      "findingId": 15350,
+      "rank": 3
+    },
+    {
+      "findingId": 10116,
+      "rank": 9
+    },
+    {
+      "findingId": 5876,
+      "rank": 1
+    },
+    {
+      "findingId": 23028,
+      "rank": null
+    },
+    {
+      "findingId": 6723,
+      "rank": 1
+    },
+    {
+      "findingId": 20865,
+      "rank": null
+    },
+    {
+      "findingId": 8319,
+      "rank": 1
+    },
+    {
+      "findingId": 16576,
+      "rank": 1
+    },
+    {
+      "findingId": 4472,
+      "rank": 1
+    },
+    {
+      "findingId": 2805,
+      "rank": 1
+    },
+    {
+      "findingId": 5577,
+      "rank": 1
+    },
+    {
+      "findingId": 7593,
+      "rank": 3
+    },
+    {
+      "findingId": 16606,
+      "rank": 1
+    },
+    {
+      "findingId": 15075,
+      "rank": null
+    },
+    {
+      "findingId": 8834,
+      "rank": 1
+    },
+    {
+      "findingId": 17434,
+      "rank": 1
+    },
+    {
+      "findingId": 21835,
+      "rank": 1
+    },
+    {
+      "findingId": 20349,
+      "rank": null
+    },
+    {
+      "findingId": 2496,
+      "rank": 3
+    },
+    {
+      "findingId": 16991,
+      "rank": 1
+    },
+    {
+      "findingId": 22225,
+      "rank": 1
+    },
+    {
+      "findingId": 19731,
+      "rank": 3
+    },
+    {
+      "findingId": 19265,
+      "rank": null
+    },
+    {
+      "findingId": 7777,
+      "rank": 1
+    },
+    {
+      "findingId": 4045,
+      "rank": 9
+    },
+    {
+      "findingId": 4628,
+      "rank": 1
+    },
+    {
+      "findingId": 5603,
+      "rank": 1
+    },
+    {
+      "findingId": 14523,
+      "rank": 1
+    },
+    {
+      "findingId": 10954,
+      "rank": null
+    },
+    {
+      "findingId": 13260,
+      "rank": null
+    },
+    {
+      "findingId": 3266,
+      "rank": 1
+    },
+    {
+      "findingId": 9328,
+      "rank": null
+    },
+    {
+      "findingId": 9228,
+      "rank": null
+    },
+    {
+      "findingId": 18890,
+      "rank": null
+    },
+    {
+      "findingId": 1555,
+      "rank": 3
+    },
+    {
+      "findingId": 20677,
+      "rank": 3
+    },
+    {
+      "findingId": 2528,
+      "rank": null
+    },
+    {
+      "findingId": 18964,
+      "rank": 1
+    },
+    {
+      "findingId": 411,
+      "rank": 1
+    },
+    {
+      "findingId": 6732,
+      "rank": 1
+    },
+    {
+      "findingId": 8010,
+      "rank": 1
+    },
+    {
+      "findingId": 600,
+      "rank": 1
+    },
+    {
+      "findingId": 16922,
+      "rank": 7
+    },
+    {
+      "findingId": 7868,
+      "rank": 1
+    },
+    {
+      "findingId": 16343,
+      "rank": 5
+    },
+    {
+      "findingId": 8224,
+      "rank": 2
+    },
+    {
+      "findingId": 605,
+      "rank": 1
+    },
+    {
+      "findingId": 8952,
+      "rank": null
+    },
+    {
+      "findingId": 10823,
+      "rank": null
+    },
+    {
+      "findingId": 11421,
+      "rank": 1
+    },
+    {
+      "findingId": 11499,
+      "rank": 1
+    },
+    {
+      "findingId": 18228,
+      "rank": 9
+    },
+    {
+      "findingId": 14051,
+      "rank": 1
+    },
+    {
+      "findingId": 17272,
+      "rank": 2
+    },
+    {
+      "findingId": 491,
+      "rank": null
+    },
+    {
+      "findingId": 10454,
+      "rank": null
+    },
+    {
+      "findingId": 19280,
+      "rank": 1
+    },
+    {
+      "findingId": 14794,
+      "rank": 2
+    },
+    {
+      "findingId": 10190,
+      "rank": 1
+    },
+    {
+      "findingId": 12005,
+      "rank": 2
+    },
+    {
+      "findingId": 21943,
+      "rank": 2
+    },
+    {
+      "findingId": 8624,
+      "rank": 1
+    },
+    {
+      "findingId": 19841,
+      "rank": 1
+    },
+    {
+      "findingId": 21826,
+      "rank": 1
+    },
+    {
+      "findingId": 16603,
+      "rank": 3
+    },
+    {
+      "findingId": 18685,
+      "rank": 1
+    },
+    {
+      "findingId": 10667,
+      "rank": 1
+    },
+    {
+      "findingId": 12536,
+      "rank": null
+    },
+    {
+      "findingId": 12589,
+      "rank": null
+    },
+    {
+      "findingId": 16811,
+      "rank": null
+    },
+    {
+      "findingId": 19734,
+      "rank": 4
+    },
+    {
+      "findingId": 5834,
+      "rank": 1
+    },
+    {
+      "findingId": 17623,
+      "rank": 1
+    },
+    {
+      "findingId": 10203,
+      "rank": 3
+    },
+    {
+      "findingId": 8435,
+      "rank": 2
+    },
+    {
+      "findingId": 9262,
+      "rank": 1
+    },
+    {
+      "findingId": 6772,
+      "rank": 1
+    },
+    {
+      "findingId": 14889,
+      "rank": 1
+    },
+    {
+      "findingId": 53,
+      "rank": null
+    },
+    {
+      "findingId": 9713,
+      "rank": 1
+    },
+    {
+      "findingId": 14767,
+      "rank": 7
+    },
+    {
+      "findingId": 8972,
+      "rank": 1
+    },
+    {
+      "findingId": 18687,
+      "rank": 1
+    },
+    {
+      "findingId": 23047,
+      "rank": 1
+    },
+    {
+      "findingId": 17996,
+      "rank": 2
+    },
+    {
+      "findingId": 994,
+      "rank": null
+    },
+    {
+      "findingId": 5075,
+      "rank": 1
+    },
+    {
+      "findingId": 5026,
+      "rank": 1
+    },
+    {
+      "findingId": 5553,
+      "rank": 1
+    },
+    {
+      "findingId": 17908,
+      "rank": 1
+    },
+    {
+      "findingId": 13106,
+      "rank": null
+    },
+    {
+      "findingId": 21712,
+      "rank": 1
+    },
+    {
+      "findingId": 19256,
+      "rank": 1
+    },
+    {
+      "findingId": 19141,
+      "rank": 5
+    },
+    {
+      "findingId": 1910,
+      "rank": 4
+    },
+    {
+      "findingId": 14487,
+      "rank": 1
+    },
+    {
+      "findingId": 7241,
+      "rank": 2
+    },
+    {
+      "findingId": 10936,
+      "rank": 1
+    },
+    {
+      "findingId": 14700,
+      "rank": null
+    },
+    {
+      "findingId": 20648,
+      "rank": 1
+    },
+    {
+      "findingId": 15565,
+      "rank": 1
+    },
+    {
+      "findingId": 7389,
+      "rank": null
+    },
+    {
+      "findingId": 19478,
+      "rank": 1
+    },
+    {
+      "findingId": 8808,
+      "rank": 4
+    },
+    {
+      "findingId": 22755,
+      "rank": null
+    },
+    {
+      "findingId": 22042,
+      "rank": 1
+    },
+    {
+      "findingId": 276,
+      "rank": 1
+    },
+    {
+      "findingId": 18291,
+      "rank": 2
+    },
+    {
+      "findingId": 10225,
+      "rank": null
+    },
+    {
+      "findingId": 23309,
+      "rank": 1
+    },
+    {
+      "findingId": 17329,
+      "rank": 1
+    },
+    {
+      "findingId": 16257,
+      "rank": 1
+    },
+    {
+      "findingId": 19007,
+      "rank": 1
+    },
+    {
+      "findingId": 2474,
+      "rank": 1
+    },
+    {
+      "findingId": 5786,
+      "rank": 1
+    },
+    {
+      "findingId": 10547,
+      "rank": 1
+    },
+    {
+      "findingId": 9961,
+      "rank": 1
+    },
+    {
+      "findingId": 3978,
+      "rank": 2
+    },
+    {
+      "findingId": 15545,
+      "rank": null
+    },
+    {
+      "findingId": 18158,
+      "rank": null
+    },
+    {
+      "findingId": 8835,
+      "rank": 1
+    },
+    {
+      "findingId": 13849,
+      "rank": 1
+    },
+    {
+      "findingId": 16959,
+      "rank": 2
+    },
+    {
+      "findingId": 21219,
+      "rank": 1
+    },
+    {
+      "findingId": 15285,
+      "rank": 1
+    },
+    {
+      "findingId": 21766,
+      "rank": 1
+    },
+    {
+      "findingId": 4466,
+      "rank": 1
+    },
+    {
+      "findingId": 8075,
+      "rank": 4
+    },
+    {
+      "findingId": 2455,
+      "rank": 1
+    },
+    {
+      "findingId": 13478,
+      "rank": 1
+    },
+    {
+      "findingId": 15372,
+      "rank": 1
+    },
+    {
+      "findingId": 13907,
+      "rank": 1
+    },
+    {
+      "findingId": 16233,
+      "rank": 1
+    },
+    {
+      "findingId": 23479,
+      "rank": 6
+    },
+    {
+      "findingId": 14819,
+      "rank": null
+    },
+    {
+      "findingId": 9518,
+      "rank": 1
+    },
+    {
+      "findingId": 869,
+      "rank": 1
+    },
+    {
+      "findingId": 16529,
+      "rank": 4
+    },
+    {
+      "findingId": 15449,
+      "rank": 1
+    },
+    {
+      "findingId": 13252,
+      "rank": null
+    },
+    {
+      "findingId": 16354,
+      "rank": 1
+    },
+    {
+      "findingId": 16723,
+      "rank": 1
+    },
+    {
+      "findingId": 16208,
+      "rank": 1
+    },
+    {
+      "findingId": 22733,
+      "rank": 1
+    },
+    {
+      "findingId": 12783,
+      "rank": null
+    },
+    {
+      "findingId": 3911,
+      "rank": 1
+    },
+    {
+      "findingId": 22653,
+      "rank": 1
+    },
+    {
+      "findingId": 22123,
+      "rank": 1
+    },
+    {
+      "findingId": 13890,
+      "rank": 1
+    },
+    {
+      "findingId": 4614,
+      "rank": null
+    },
+    {
+      "findingId": 9606,
+      "rank": 1
+    },
+    {
+      "findingId": 7866,
+      "rank": 1
+    },
+    {
+      "findingId": 16448,
+      "rank": 1
+    },
+    {
+      "findingId": 2696,
+      "rank": 1
+    },
+    {
+      "findingId": 3288,
+      "rank": null
+    },
+    {
+      "findingId": 10201,
+      "rank": 3
+    },
+    {
+      "findingId": 19123,
+      "rank": 1
+    },
+    {
+      "findingId": 4883,
+      "rank": 1
+    },
+    {
+      "findingId": 9420,
+      "rank": 1
+    },
+    {
+      "findingId": 10218,
+      "rank": 1
+    },
+    {
+      "findingId": 22473,
+      "rank": 1
+    },
+    {
+      "findingId": 23530,
+      "rank": 3
+    },
+    {
+      "findingId": 14916,
+      "rank": 1
+    },
+    {
+      "findingId": 15848,
+      "rank": null
+    },
+    {
+      "findingId": 13637,
+      "rank": 1
+    },
+    {
+      "findingId": 7159,
+      "rank": 1
+    },
+    {
+      "findingId": 16594,
+      "rank": 1
+    },
+    {
+      "findingId": 4231,
+      "rank": 1
+    }
+  ],
+  "limits": "Local stdio process startup, initialization, serialization, validation, SQLite search, and bounded context assembly. Three starts and three sequential query passes in the first process. OS caches uncontrolled. Same development title-to-body sample; no independent relevance or audit verdict labels, no model calls or network latency."
+}

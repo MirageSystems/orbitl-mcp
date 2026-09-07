@@ -1,0 +1,1855 @@
+{
+  "benchmark": "known-item-title-to-body-v1",
+  "created_at": "2026-09-07T23:28:04.313229+00:00",
+  "dataset_sha256": "25364c90b666820a8e45c64164f294a407db3dc9d51fece02b4b5b4e08c495ed",
+  "script_sha256": "a15214bf228c2ff59a675b6467b1953bae2e7514a27d09f8048e2cf2d2ee05f1",
+  "environment": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "python": "3.13.11",
+    "sqlite": "3.50.4",
+    "duckdb": "1.5.5"
+  },
+  "raw_records": 23625,
+  "indexed_records": 23622,
+  "eligible_queries": 23270,
+  "query_count": 200,
+  "query_ids": [
+    22537,
+    10307,
+    1805,
+    4263,
+    14272,
+    6192,
+    5586,
+    14708,
+    15759,
+    1915,
+    10207,
+    12412,
+    15689,
+    6682,
+    9560,
+    12916,
+    13651,
+    175,
+    18643,
+    13539,
+    15531,
+    5987,
+    13655,
+    2343,
+    21930,
+    10316,
+    826,
+    9065,
+    17000,
+    17668,
+    18336,
+    4195,
+    15350,
+    10116,
+    5876,
+    23028,
+    6723,
+    20865,
+    8319,
+    16576,
+    4472,
+    2805,
+    5577,
+    7593,
+    16606,
+    15075,
+    8834,
+    17434,
+    21835,
+    20349,
+    2496,
+    16991,
+    22225,
+    19731,
+    19265,
+    7777,
+    4045,
+    4628,
+    5603,
+    14523,
+    10954,
+    13260,
+    3266,
+    9328,
+    9228,
+    18890,
+    1555,
+    20677,
+    2528,
+    18964,
+    411,
+    6732,
+    8010,
+    600,
+    16922,
+    7868,
+    16343,
+    8224,
+    605,
+    8952,
+    10823,
+    11421,
+    11499,
+    18228,
+    14051,
+    17272,
+    491,
+    10454,
+    19280,
+    14794,
+    10190,
+    12005,
+    21943,
+    8624,
+    19841,
+    21826,
+    16603,
+    18685,
+    10667,
+    12536,
+    12589,
+    16811,
+    19734,
+    5834,
+    17623,
+    10203,
+    8435,
+    9262,
+    6772,
+    14889,
+    53,
+    9713,
+    14767,
+    8972,
+    18687,
+    23047,
+    17996,
+    994,
+    5075,
+    5026,
+    5553,
+    17908,
+    13106,
+    21712,
+    19256,
+    19141,
+    1910,
+    14487,
+    7241,
+    10936,
+    14700,
+    20648,
+    15565,
+    7389,
+    19478,
+    8808,
+    22755,
+    22042,
+    276,
+    18291,
+    10225,
+    23309,
+    17329,
+    16257,
+    19007,
+    2474,
+    5786,
+    10547,
+    9961,
+    3978,
+    15545,
+    18158,
+    8835,
+    13849,
+    16959,
+    21219,
+    15285,
+    21766,
+    4466,
+    8075,
+    2455,
+    13478,
+    15372,
+    13907,
+    16233,
+    23479,
+    14819,
+    9518,
+    869,
+    16529,
+    15449,
+    13252,
+    16354,
+    16723,
+    16208,
+    22733,
+    12783,
+    3911,
+    22653,
+    22123,
+    13890,
+    4614,
+    9606,
+    7866,
+    16448,
+    2696,
+    3288,
+    10201,
+    19123,
+    4883,
+    9420,
+    10218,
+    22473,
+    23530,
+    14916,
+    15848,
+    13637,
+    7159,
+    16594,
+    4231
+  ],
+  "method": "SQLite FTS5 default tokenizer and BM25; OR of non-stopword title tokens; title and PoC excluded from index; exact full-text deduplication; unique descriptions in query sample; one first pass and three warm repeats; sequential execution.",
+  "limits": [
+    "Known-item diagnostic, not independent relevance labels or audit verdicts.",
+    "Titles and bodies come from the same report; shared wording makes this easier than reviewer queries.",
+    "Near-duplicate reports and project overlap are not excluded.",
+    "Recommendations are unvalidated reference text and may repeat descriptions.",
+    "Timing includes SQL ranking and fetching only; no model or network time. First pass is not a cold OS-cache measurement.",
+    "One machine and one run; no production latency or Rust-versus-TypeScript conclusion."
+  ],
+  "variants": {
+    "description": {
+      "build_seconds": 0.48162083300121594,
+      "index_bytes": 48205824,
+      "hit_at_1": 0.56,
+      "hit_at_5": 0.705,
+      "hit_at_10": 0.75,
+      "mrr_at_10": 0.6240674603174603,
+      "first_pass_p50_ms": 2.01487499907671,
+      "warm_p50_ms": 2.173312499508029,
+      "warm_p95_ms": 5.8955829990736675,
+      "ranks": [
+        {
+          "finding_id": 22537,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10307,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 1805,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4263,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 14272,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 6192,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5586,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 14708,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 15759,
+          "rank_at_10": 7
+        },
+        {
+          "finding_id": 1915,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10207,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 12412,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15689,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 6682,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 9560,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 12916,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13651,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 175,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18643,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13539,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 15531,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 5987,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13655,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 2343,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 21930,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10316,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 826,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9065,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17000,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17668,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18336,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4195,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15350,
+          "rank_at_10": 6
+        },
+        {
+          "finding_id": 10116,
+          "rank_at_10": 9
+        },
+        {
+          "finding_id": 5876,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 23028,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 6723,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 20865,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 8319,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 16576,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4472,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 2805,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5577,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 7593,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 16606,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15075,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 8834,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17434,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 21835,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 20349,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 2496,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 16991,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22225,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19731,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 19265,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 7777,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 4045,
+          "rank_at_10": 7
+        },
+        {
+          "finding_id": 4628,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5603,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14523,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10954,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 13260,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 3266,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 9328,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9228,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 18890,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 1555,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 20677,
+          "rank_at_10": 8
+        },
+        {
+          "finding_id": 2528,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 18964,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 411,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 6732,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 8010,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 600,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16922,
+          "rank_at_10": 8
+        },
+        {
+          "finding_id": 7868,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16343,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 8224,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 605,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 8952,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10823,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 11421,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 11499,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18228,
+          "rank_at_10": 10
+        },
+        {
+          "finding_id": 14051,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17272,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 491,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10454,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 19280,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14794,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 10190,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 12005,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 21943,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 8624,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19841,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 21826,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16603,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 18685,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10667,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 12536,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 12589,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 16811,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 19734,
+          "rank_at_10": 5
+        },
+        {
+          "finding_id": 5834,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17623,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10203,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 8435,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 9262,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 6772,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14889,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 53,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9713,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 14767,
+          "rank_at_10": 6
+        },
+        {
+          "finding_id": 8972,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18687,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 23047,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17996,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 994,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 5075,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5026,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 5553,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17908,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13106,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 21712,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19256,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19141,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 1910,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 14487,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 7241,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 10936,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14700,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 20648,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15565,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 7389,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 19478,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 8808,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22755,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 22042,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 276,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18291,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10225,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 23309,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17329,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16257,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19007,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 2474,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5786,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10547,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 9961,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 3978,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 15545,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 18158,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 8835,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13849,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16959,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 21219,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15285,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 21766,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4466,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 8075,
+          "rank_at_10": 6
+        },
+        {
+          "finding_id": 2455,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13478,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15372,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13907,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16233,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 23479,
+          "rank_at_10": 5
+        },
+        {
+          "finding_id": 14819,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9518,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 869,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16529,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 15449,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13252,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 16354,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 16723,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16208,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22733,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 12783,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 3911,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 22653,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22123,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13890,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4614,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9606,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 7866,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 16448,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 2696,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 3288,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10201,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19123,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4883,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 9420,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10218,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22473,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 23530,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 14916,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15848,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 13637,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 7159,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16594,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 4231,
+          "rank_at_10": 1
+        }
+      ]
+    },
+    "description_recommendation": {
+      "build_seconds": 0.575547500000539,
+      "index_bytes": 62464000,
+      "hit_at_1": 0.6,
+      "hit_at_5": 0.76,
+      "hit_at_10": 0.8,
+      "mrr_at_10": 0.6642261904761905,
+      "first_pass_p50_ms": 2.501353999832645,
+      "warm_p50_ms": 2.5410830003238516,
+      "warm_p95_ms": 6.7472080008883495,
+      "ranks": [
+        {
+          "finding_id": 22537,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10307,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 1805,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4263,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14272,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 6192,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5586,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 14708,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 15759,
+          "rank_at_10": 7
+        },
+        {
+          "finding_id": 1915,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10207,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 12412,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15689,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 6682,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 9560,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 12916,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13651,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 175,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18643,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13539,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 15531,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 5987,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13655,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 2343,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 21930,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10316,
+          "rank_at_10": 10
+        },
+        {
+          "finding_id": 826,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9065,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17000,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17668,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18336,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 4195,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15350,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 10116,
+          "rank_at_10": 9
+        },
+        {
+          "finding_id": 5876,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 23028,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 6723,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 20865,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 8319,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16576,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4472,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 2805,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5577,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 7593,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 16606,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15075,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 8834,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17434,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 21835,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 20349,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 2496,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 16991,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22225,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19731,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 19265,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 7777,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4045,
+          "rank_at_10": 9
+        },
+        {
+          "finding_id": 4628,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5603,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14523,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10954,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 13260,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 3266,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 9328,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9228,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 18890,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 1555,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 20677,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 2528,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 18964,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 411,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 6732,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 8010,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 600,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16922,
+          "rank_at_10": 7
+        },
+        {
+          "finding_id": 7868,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16343,
+          "rank_at_10": 5
+        },
+        {
+          "finding_id": 8224,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 605,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 8952,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10823,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 11421,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 11499,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18228,
+          "rank_at_10": 9
+        },
+        {
+          "finding_id": 14051,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17272,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 491,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10454,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 19280,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14794,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 10190,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 12005,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 21943,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 8624,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19841,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 21826,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16603,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 18685,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10667,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 12536,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 12589,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 16811,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 19734,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 5834,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17623,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10203,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 8435,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 9262,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 6772,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14889,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 53,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9713,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14767,
+          "rank_at_10": 7
+        },
+        {
+          "finding_id": 8972,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18687,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 23047,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17996,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 994,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 5075,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5026,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5553,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17908,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13106,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 21712,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19256,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19141,
+          "rank_at_10": 5
+        },
+        {
+          "finding_id": 1910,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 14487,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 7241,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 10936,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 14700,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 20648,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15565,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 7389,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 19478,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 8808,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 22755,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 22042,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 276,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 18291,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 10225,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 23309,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 17329,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16257,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 19007,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 2474,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 5786,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10547,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 9961,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 3978,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 15545,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 18158,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 8835,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13849,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16959,
+          "rank_at_10": 2
+        },
+        {
+          "finding_id": 21219,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15285,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 21766,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4466,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 8075,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 2455,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13478,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15372,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13907,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16233,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 23479,
+          "rank_at_10": 6
+        },
+        {
+          "finding_id": 14819,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9518,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 869,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16529,
+          "rank_at_10": 4
+        },
+        {
+          "finding_id": 15449,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13252,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 16354,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16723,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16208,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22733,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 12783,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 3911,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22653,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22123,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 13890,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4614,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 9606,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 7866,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16448,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 2696,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 3288,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 10201,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 19123,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4883,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 9420,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 10218,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 22473,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 23530,
+          "rank_at_10": 3
+        },
+        {
+          "finding_id": 14916,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 15848,
+          "rank_at_10": null
+        },
+        {
+          "finding_id": 13637,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 7159,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 16594,
+          "rank_at_10": 1
+        },
+        {
+          "finding_id": 4231,
+          "rank_at_10": 1
+        }
+      ]
+    }
+  }
+}

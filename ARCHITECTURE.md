@@ -1,96 +1,51 @@
-# Orbitl Architecture Summary
+# Architecture
 
-## ✅ **Final Simplified Architecture**
+The Sei interface, reference CLI, and audit-reference MCP have separate entrypoints.
 
-After implementing and testing both MCP and native approaches, we chose the **native Cloudflare AI function calling** for maximum simplicity and performance.
+| Area                               | Responsibility                                                                   |
+| ---------------------------------- | -------------------------------------------------------------------------------- |
+| `src/cli.ts`                       | Sei commands and chat startup                                                    |
+| `src/interface/chat.ts`            | Readline interaction, static system prompt, and recent history                   |
+| `src/intelligence/client.ts`       | Cloudflare requests and recursive native tool calls                              |
+| `src/intelligence/tool-manager.ts` | Five contract tools and heuristic output                                         |
+| `src/analysis/reader.ts`           | ABI-based contract inspection                                                    |
+| `src/network/sei.ts`               | RPC and explorer access                                                          |
+| `src/wallet/wallet-connect.ts`     | External wallet session management                                               |
+| `src/retrieval/findings.ts`        | Readonly types, corpus validation, text normalization, query terms, and excerpts |
+| `src/retrieval/store.ts`           | Transactional SQLite indexing and prepared read operations                       |
+| `src/retrieval/cli.ts`             | Index building and direct JSON lookup                                            |
+| `src/mcp/context.ts`               | Citations, context limits, paging, and the review prompt                         |
+| `src/mcp/server.ts`                | MCP tools, prompt, resource, and schemas                                         |
+| `src/mcp/cli.ts`                   | Read-only database lifetime and stdio transport                                  |
 
-### **The Flow**
-```
-User Input → Cloudflare AI (with native tools) → AI calls tools → Response
-```
+## Reference data flow
 
-### **File Structure (1,673 lines total)**
-```
-src/
-├── ai/
-│   └── simple-client.ts          # Cloudflare AI with native tools
-├── tools/
-│   ├── definitions.ts           # Tool definitions for AI
-│   └── executor.ts              # Tool execution logic
-├── chat/
-│   └── simple-interface.ts      # Clean chat interface
-├── core/
-│   └── contract-reader.ts       # Contract analysis (unchanged)
-├── blockchain/
-│   └── sei-provider.ts          # Sei network access (unchanged)
-├── types/
-│   └── contract.ts              # Type definitions (unchanged)
-└── cli/
-    └── index.ts                 # Entry point
-```
+The offline Python helper reads the local Parquet file, removes exact full-text duplicates, and exports a versioned JSON corpus with the source-dataset hash. It retains one source filename and historical severity label for each exported finding. It excludes the dedicated PoC field.
 
-## 🎯 **Key Features**
+The TypeScript build command validates the corpus and writes metadata, narrative payloads, and an FTS5 index in one transaction. It indexes descriptions and recommendations. Titles remain metadata and are excluded from search, which preserves the title-to-body diagnostic boundary.
 
-### **1. Native AI Tools**
-- `analyze_contract` - Full contract analysis
-- `get_function_details` - Deep function analysis  
-- `check_safety` - Risk assessment
-- `build_transaction` - Unsigned tx data
-- `estimate_gas` - Gas estimation
+A completed database is published through an exclusive filesystem link. Existing destinations are preserved. Failed builds leave no published partial index. Query processes open the database read-only with extension loading disabled.
 
-### **2. Security First**
-- ✅ NEVER touches private keys
-- ✅ Only builds unsigned transaction data
-- ✅ Warns about risks and scams
-- ✅ Emphasizes external wallet signing
+Query preparation is a pure function. Search terms become quoted FTS terms passed through bound SQL parameters. Queries are limited to 2,048 characters and 64 searchable terms. Results are limited to ten. SQLite BM25 determines rank, with finding ID as a deterministic tie-breaker.
 
-### **3. Simple Usage**
-```bash
-pnpm dev
-> What is 0x882f62fe8e9594470d1da0f70bc85096f6c60423?
-[AI automatically calls analyze_contract tool]
+## MCP context flow
 
-> Build a swap transaction
-[AI calls build_transaction tool]
-```
+An MCP host starts `dist/mcp/cli.js` over stdio with one explicit index path. The server opens that index once, prepares its read statements, and keeps the connection for the transport lifetime. Stdout carries protocol messages only.
 
-## 🚀 **Benefits of This Architecture**
+`search_audit_references` returns clipped descriptions and recommendations. The encoded tool result cannot exceed 64 KiB before the JSON-RPC envelope, and `omittedForBudget` records results removed to meet that limit. The budget includes both the structured payload and its text copy for client compatibility. Oversized pages fail with a request for a shorter page. `get_audit_reference` reads either narrative section by character offset in pages of up to 8,000 characters. Unicode paging does not split code points.
 
-1. **80% Less Code** - Removed MCP complexity (2000+ lines → 1673 lines)
-2. **Native Performance** - Uses Cloudflare's built-in function calling
-3. **AI Decides Everything** - No manual preprocessing or routing
-4. **OpenAI Compatible** - Standard function calling pattern
-5. **Easy to Debug** - Simple, linear flow
+Every tool response includes the source-dataset hash, finding ID, stable `orbitl:<hash>:<id>` citation, source filename, historical severity, and reference-use warning. The `orbitl://index` resource reports dataset identity and the lexical retrieval method. The dataset hash identifies the source snapshot. It does not authenticate later edits to the exported corpus or SQLite index.
 
-## 🔧 **Technologies Used**
+`review_with_references` searches five references and returns a prompt containing the existing concern, supplied source evidence, bounded historical context, and assessment rules. The complete prompt result has the same 64 KiB encoded budget and rejects oversized evidence instead of silently truncating it. The MCP does not generate the assessment. The host model does. This is retrieval-augmented generation when the host model uses the returned context, with SQLite FTS5 BM25 as the current retrieval backend.
 
-- **AI**: Cloudflare Workers AI (Llama 3.3 70B)
-- **Blockchain**: ethers.js v6 + Sei Network
-- **CLI**: commander.js + chalk + ora
-- **Language**: TypeScript with strict checking
+## Trust boundary
 
-## 📊 **Current Status**
+Historical descriptions and recommendations are untrusted data. The server does not execute them and offers no network, indexing, scanning, transaction, wallet, or report-writing tool. A similar finding does not establish applicability. Reviewers must compare prerequisites with the current source and keep the candidate disposition in the review's existing ledger.
 
-- ✅ **Phase 1**: Contract analysis working
-- ✅ **Phase 2**: AI chat with native tools working  
-- 🔜 **Phase 3**: Transaction builder (ready but needs testing)
-- 🔜 **Phase 4**: Demo mode with famous contracts
+The runtime retrieval and MCP code use strict functional TypeScript and readonly records. The SDK supplies the MCP server and transport objects at the protocol boundary. The offline Parquet conversion helper remains Python. The MCP SDK v2 uses Zod 4 schemas through the `zod-v4` alias. Zod 3 remains for the existing wallet dependency peer requirement.
 
-## 🎮 **Demo Ready**
+## Existing limitations
 
-The system can:
-1. Analyze any Sei contract automatically when mentioned
-2. Explain functions in plain English
-3. Check safety and risks
-4. Build unsigned transaction data
-5. Estimate gas costs
+The lexical backend does not use embeddings, understand the current codebase, or establish semantic relevance. The provisional known-item benchmark does not measure audit accuracy. BTC manual validation and a project-held-out evaluation remain open.
 
-**Perfect for hackathon demo**: "We NEVER touch your keys - the AI builds transactions for your external wallet to sign!"
-
-## 🏗️ **Why This Wins**
-
-1. **Actually Works** - Simple, reliable architecture
-2. **Secure by Design** - Never handles private keys
-3. **AI-First** - Natural conversation with smart tools
-4. **Fast Development** - Clean, maintainable code
-5. **Demo Ready** - Impressive 30-second demonstrations
+Sei analysis uses ABI shape and function names. Published ABI status does not establish security. Transaction encoding and gas estimation contain mock behavior. The chat client has a depth-three tool cap and limited in-memory history. This work does not establish live-provider or wallet correctness.

@@ -166,7 +166,7 @@ export class CLIFormatter {
       ['clear', 'Clear conversation history'],
       ['tools', 'Show available analysis tools'],
       ['exit', 'Exit Orbitl']
-    ].map(([cmd, desc]) => [chalk.yellow(cmd), desc]);
+    ].map(([cmd = '', desc = '']) => [chalk.yellow(cmd), desc]);
 
     output += chalk.bold.blue('🔧 Commands\n\n');
     output += UIComponents.createTable(['Command', 'Description'], commandRows, {

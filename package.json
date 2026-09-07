@@ -1,31 +1,71 @@
 {
   "name": "orbitl",
   "version": "1.0.0",
-  "description": "Natural language interface for Sei smart contract interaction",
+  "description": "Local audit-reference MCP and Sei smart contract CLI",
   "type": "module",
   "main": "dist/cli.js",
   "bin": {
-    "orbitl": "dist/cli.js"
+    "orbitl": "dist/cli.js",
+    "orbitl-mcp": "dist/mcp/cli.js",
+    "orbitl-findings": "dist/retrieval/cli.js"
   },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "!dist/**/*.test.js",
+    "scripts/export-findings.py",
+    "README.md",
+    "ARCHITECTURE.md",
+    "CONTEXT.md",
+    "TESTING.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "CODE_OF_CONDUCT.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "NOTICE",
+    "docs/MCP-SETUP.md",
+    ".env.example"
+  ],
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
     "start": "node dist/cli.js",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "findings": "tsx src/retrieval/cli.ts",
+    "test:retrieval": "tsx --test src/retrieval/findings.test.ts",
+    "mcp": "node dist/mcp/cli.js",
+    "test:mcp": "tsc && tsx --test src/mcp/*.test.ts",
+    "test": "tsc && tsx --test src/retrieval/*.test.ts src/mcp/*.test.ts",
+    "typecheck": "tsc -p tsconfig.verify.json",
+    "prepack": "tsc"
   },
   "keywords": [
-    "sei",
-    "blockchain",
-    "cli",
     "mcp",
-    "smart-contracts"
+    "web3",
+    "smart-contracts",
+    "audit-references",
+    "sei",
+    "cli"
   ],
-  "author": "",
   "license": "MIT",
-  "engines": {
-    "node": ">=20.0.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MirageSystems/orbitl-mcp.git"
   },
+  "homepage": "https://github.com/MirageSystems/orbitl-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/MirageSystems/orbitl-mcp/issues"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "pnpm@9.15.9",
   "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "@walletconnect/core": "^2.21.8",
+    "@walletconnect/sign-client": "^2.21.8",
+    "@walletconnect/utils": "^2.21.8",
     "boxen": "^8.0.1",
     "chalk": "^5.5.0",
     "cli-highlight": "^2.1.11",
@@ -36,18 +76,18 @@
     "figlet": "^1.8.2",
     "gradient-string": "^3.0.0",
     "ora": "^8.2.0",
+    "qrcode-terminal": "^0.12.0",
     "winston": "^3.17.0",
-    "@walletconnect/core": "^2.21.8",
-    "@walletconnect/sign-client": "^2.21.8",
-    "@walletconnect/utils": "^2.21.8",
-    "qrcode-terminal": "^0.12.0"
+    "zod": "3.25.76",
+    "zod-v4": "npm:zod@4.5.4"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
     "@types/figlet": "^1.7.0",
     "@types/node": "^24.3.0",
+    "@types/qrcode-terminal": "^0.12.2",
     "prettier": "^3.6.2",
     "tsx": "^4.20.4",
-    "typescript": "^5.9.2",
-    "@types/qrcode-terminal": "^0.12.2"
+    "typescript": "^5.9.2"
   }
 }
