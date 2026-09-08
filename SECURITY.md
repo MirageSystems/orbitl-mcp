@@ -2,11 +2,11 @@
 
 ## Scope
 
-Orbitl includes a read-only MCP interface for local historical audit references. It searches a local SQLite index, returns bounded excerpts with dataset and finding citations, provides paged description or recommendation text, and prepares a prompt that keeps supplied source evidence separate from historical context. It does not scan a contract, validate a current finding, or execute reference code. Historical text is untrusted data.
+Orbitl is a read-only MCP for local historical audit references. It searches a local SQLite index, returns bounded excerpts with dataset and finding citations, provides paged description or recommendation text, and prepares a prompt that keeps supplied source evidence separate from historical context. It does not scan a contract, validate a current finding, or execute reference code. Historical text is untrusted data.
 
 The dataset hash identifies the recorded source snapshot. It does not authenticate later edits to a corpus or index. Reviewers should compare historical prerequisites with the reviewed source and keep the finding ID and dataset hash with any citation.
 
-The repository also contains legacy Sei CLI and chat functionality that uses live RPC, explorer, Cloudflare, and WalletConnect integrations. Its transaction encoding and gas estimates contain mock or static behavior. The WalletConnect request includes both Sei networks even when the existing testnet flag is used. Do not treat these paths as a validated execution flow, and never provide private keys, seed phrases, mnemonics, or wallet files.
+Orbitl requires no credentials. The MCP host may send supplied evidence and retrieved references to its model provider. Configure that host according to the confidentiality requirements of the review. Do not provide private keys, seed phrases, or wallet credential files.
 
 ## Reporting a vulnerability
 

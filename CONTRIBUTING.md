@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for helping improve Orbitl. Keep changes focused on the behavior they are meant to change, and read `README.md`, `ARCHITECTURE.md`, and `TESTING.md` before editing.
+Keep changes focused on the behavior they are meant to change, and read `README.md`, `ARCHITECTURE.md`, and `TESTING.md` before editing.
 
 ## Development setup
 
@@ -10,7 +10,7 @@ Use Node.js 24 or newer and pnpm 9.15.9.
 pnpm install --frozen-lockfile
 ```
 
-Use strict TypeScript and prefer small functions with readonly data in the retrieval and MCP code. Keep file, database, and network operations at explicit boundaries. Do not add live RPC, Cloudflare, WalletConnect, or other provider calls to unit tests. Use local fixtures and disposable temporary files instead.
+Use strict TypeScript and prefer small functions with readonly data in the retrieval and MCP code. Keep filesystem, database, and protocol operations at explicit boundaries. Tests use local fixtures and disposable temporary files. The reference server makes no model or network calls.
 
 ## Checks
 

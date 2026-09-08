@@ -5,16 +5,12 @@
     "moduleResolution": "NodeNext",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "allowJs": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
@@ -22,7 +18,7 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["ES2022", "DOM"]
+    "lib": ["ES2022"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

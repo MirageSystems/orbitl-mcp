@@ -1,11 +1,11 @@
 {
   "name": "orbitl",
   "version": "1.0.0",
-  "description": "Local audit-reference MCP and Sei smart contract CLI",
+  "description": "Historical audit findings for Web3 security review, served over MCP",
   "type": "module",
-  "main": "dist/cli.js",
+  "main": "dist/mcp/cli.js",
   "bin": {
-    "orbitl": "dist/cli.js",
+    "orbitl": "dist/mcp/cli.js",
     "orbitl-mcp": "dist/mcp/cli.js",
     "orbitl-findings": "dist/retrieval/cli.js"
   },
@@ -25,28 +25,27 @@
     "LICENSE",
     "NOTICE",
     "docs/MCP-SETUP.md",
-    ".env.example"
+    "examples"
   ],
   "scripts": {
-    "dev": "tsx src/cli.ts",
-    "build": "tsc",
-    "start": "node dist/cli.js",
+    "dev": "tsx src/mcp/cli.ts",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc",
+    "start": "node dist/mcp/cli.js",
     "format": "prettier --write \"src/**/*.ts\"",
     "findings": "tsx src/retrieval/cli.ts",
-    "test:retrieval": "tsx --test src/retrieval/findings.test.ts",
+    "test:retrieval": "npm run build && tsx --test src/retrieval/findings.test.ts",
     "mcp": "node dist/mcp/cli.js",
-    "test:mcp": "tsc && tsx --test src/mcp/*.test.ts",
-    "test": "tsc && tsx --test src/retrieval/*.test.ts src/mcp/*.test.ts",
+    "test:mcp": "npm run build && tsx --test src/mcp/*.test.ts",
+    "test": "npm run build && tsx --test src/retrieval/*.test.ts src/mcp/*.test.ts",
     "typecheck": "tsc -p tsconfig.verify.json",
-    "prepack": "tsc"
+    "prepack": "npm run build"
   },
   "keywords": [
     "mcp",
     "web3",
-    "smart-contracts",
-    "audit-references",
-    "sei",
-    "cli"
+    "security",
+    "audit-references"
   ],
   "license": "MIT",
   "repository": {
@@ -63,29 +62,11 @@
   "packageManager": "pnpm@9.15.9",
   "dependencies": {
     "@modelcontextprotocol/server": "2.0.0",
-    "@walletconnect/core": "^2.21.8",
-    "@walletconnect/sign-client": "^2.21.8",
-    "@walletconnect/utils": "^2.21.8",
-    "boxen": "^8.0.1",
-    "chalk": "^5.5.0",
-    "cli-highlight": "^2.1.11",
-    "cli-table3": "^0.6.5",
-    "commander": "^14.0.0",
-    "dotenv": "^17.2.1",
-    "ethers": "6",
-    "figlet": "^1.8.2",
-    "gradient-string": "^3.0.0",
-    "ora": "^8.2.0",
-    "qrcode-terminal": "^0.12.0",
-    "winston": "^3.17.0",
-    "zod": "3.25.76",
-    "zod-v4": "npm:zod@4.5.4"
+    "zod": "4.5.4"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.0.0",
-    "@types/figlet": "^1.7.0",
     "@types/node": "^24.3.0",
-    "@types/qrcode-terminal": "^0.12.2",
     "prettier": "^3.6.2",
     "tsx": "^4.20.4",
     "typescript": "^5.9.2"

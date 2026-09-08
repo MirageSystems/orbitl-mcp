@@ -1,6 +1,6 @@
 # Audit reference glossary
 
-Vocabulary for historical findings, retrieval, review assessment, and Orbitl's existing contract interface. See `ARCHITECTURE.md` for implementation details.
+Vocabulary for historical findings, retrieval, review assessment. See `ARCHITECTURE.md` for implementation details.
 
 ## Language
 
@@ -71,15 +71,3 @@ _Avoid_: confidence score, safety score
 **Embedding**:
 A representation of text used for semantic similarity search.
 _Avoid_: vector without qualification
-
-**Verified**:
-Orbitl's label for a contract whose ABI was obtained from the explorer. It does not establish an audit or security assessment.
-_Avoid_: audited, safe
-
-**Contract type**:
-Orbitl's coarse classification from ABI function names: Token, DEX, Farm, or Unknown.
-_Avoid_: security category, failure pattern
-
-**Safety score**:
-Orbitl's heuristic zero-to-one-hundred rating based on contract metadata and ABI shape. It is not a source-level security assessment.
-_Avoid_: audit result, risk score

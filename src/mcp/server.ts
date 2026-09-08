@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/server";
-import * as z from "zod-v4";
+import * as z from "zod";
 import type { createFindingReader } from "../retrieval/store.js";
 import {
   boundedResult,

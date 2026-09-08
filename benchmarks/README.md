@@ -17,17 +17,17 @@ Each variant runs one first pass and three warm repeats, sequentially. Warm timi
 | Python SQLite, descriptions                         |   56% | 70.5% |    75% |  5.90 ms |
 | Python SQLite, descriptions and recommendations     |   60% |   76% |    80% |  6.75 ms |
 | TypeScript MiniSearch trial                         | 52.5% |   70% |  72.5% | 13.02 ms |
-| TypeScript SQLite, descriptions and recommendations |   60% |   76% |    80% |  6.61 ms |
+| TypeScript SQLite, descriptions and recommendations |   60% |   76% |    80% |  7.48 ms |
 
-The TypeScript SQLite run built its database in about 0.74 seconds and opened it in about 0.11 ms. Its 111.4 MiB database includes full narrative payloads as well as the text index; the Python timing baseline stores only indexed fields. The final TypeScript benchmark ran on Node 24.0.0 with SQLite 3.49.1. Process RSS after the TypeScript build was about 370.0 MiB, including the loaded corpus and benchmark data. This is not the memory footprint of a fresh query process.
+The TypeScript SQLite run built its database in about 1.29 seconds and opened it in about 0.13 ms. Its 111.4 MiB database includes full narrative payloads as well as the text index; the Python timing baseline stores only indexed fields. The final TypeScript benchmark ran on Node 24.0.0 with SQLite 3.49.1. Process RSS after the TypeScript build was about 368.7 MiB, including the loaded corpus and benchmark data. This is not the memory footprint of a fresh query process.
 
 The MiniSearch trial required about 3.9 seconds to build and about 499.3 MiB process RSS after construction. The final implementation uses SQLite. The retained trial results are historical evidence, not a dependency or a claim about all workloads.
 
 ## MCP process measurements
 
-The compiled MCP server was measured on the same Node 24.0.0 runtime and 200-query sample through an official SDK v2 stdio client. Three sequential starts took 75.1 to 81.2 ms to initialize, or 80.8 to 93.9 ms including the first search. The first process then handled 600 sequential search calls across three passes.
+The compiled MCP server was measured on the same Node 24.0.0 runtime and 200-query sample through an official SDK v2 stdio client. Three sequential starts took 82.9 to 113.0 ms to initialize, or 90.2 to 133.0 ms including the first search. The first process then handled 600 sequential search calls across three passes.
 
-Warm end-to-end search latency was 3.56 ms p50 and 8.17 ms p95. This includes protocol serialization, schema validation, SQLite lookup, payload parsing, and bounded context assembly. The largest encoded tool result was 48,334 bytes. Top-5 and top-10 retrieval remained 76% and 80%; all 200 ranks matched the direct reader.
+Warm end-to-end search latency was 6.36 ms p50 and 15.39 ms p95. This includes protocol serialization, schema validation, SQLite lookup, payload parsing, and bounded context assembly. The largest encoded tool result was 48,334 bytes. Top-5 and top-10 retrieval remained 76% and 80%; all 200 ranks matched the direct reader.
 
 These are local process measurements with uncontrolled OS caches. They contain no model call or network latency and do not establish production latency. The host's model generation time must be measured separately.
 

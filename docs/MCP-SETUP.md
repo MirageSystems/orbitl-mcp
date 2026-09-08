@@ -14,7 +14,7 @@ pnpm build
 pnpm test
 ```
 
-Follow the [index instructions](../README.md#build-a-local-reference-index) with a dataset you have permission to use. The repository and package do not include that dataset or a generated index. Keep the corpus and index in `.orbitl/` or another private local directory.
+Start with the [synthetic demo](../examples/README.md), then use the [reference data instructions](../README.md) with a dataset you have permission to use. External audit data and generated indexes are excluded from the repository and package. Keep your corpus and index in `.orbitl/` or another private local directory.
 
 The client starts the compiled server with this command:
 
@@ -87,6 +87,6 @@ The server makes no model or network calls. Your MCP host may send returned text
 - **FTS5 is unavailable:** check the Node executable used by the client. Node 22.13.0 is unsupported; tests cover Node 24.0.0 and 26.7.0.
 - **No references returned:** use a short query containing words likely to occur in a historical description or recommendation. Retrieval is lexical and has no embedding model.
 - **Reference output is too large:** request a shorter page with `length` and continue with `nextOffset`.
-- **Tools are missing:** confirm the client starts `dist/mcp/cli.js` after a successful build. `dist/cli.js` starts the separate Sei CLI.
+- **Tools are missing:** confirm the client starts `dist/mcp/cli.js` after a successful build. Both `orbitl` and `orbitl-mcp` start the reference server; `orbitl-findings` manages the offline index.
 
 See [testing](../TESTING.md) for local protocol checks and [security](../SECURITY.md) for the trust boundaries.

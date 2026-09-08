@@ -1,6 +1,7 @@
 Orbitl NOTICE
 
-Orbitl source code is licensed under the MIT License in LICENSE.
+Orbitl source code and the original synthetic demo in examples/ are licensed
+under the MIT License in LICENSE.
 
 The actual audit dataset, generated corpus files, SQLite indexes, imported
 private reports, and related reference data are excluded from this package.

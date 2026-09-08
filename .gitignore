@@ -7,7 +7,6 @@ build/
 
 # Local configuration and credentials
 .env*
-!.env.example
 *.seed
 
 # Local corpora, indexes, and review data

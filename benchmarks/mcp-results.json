@@ -1,12 +1,12 @@
 {
   "benchmark": "mcp-known-item-v1",
-  "createdAt": "2026-09-07T23:31:46.074Z",
+  "createdAt": "2026-09-07T23:59:11.187Z",
   "harnessSha256": "b68aede3571bac39b710a1776adcb56f94b998ec49814e68de5bb7aa95bb0bcc",
-  "lockfileSha256": "11792554f15d8cb6d73bdb05dada7d5101061f79f6e1d512feba4f310b1ede39",
+  "lockfileSha256": "d9ce080413a07e63179fd016d919524768ad93b295de087289508eddd27f9b8f",
   "node": "v24.0.0",
   "protocol": "legacy initialize with official SDK v2 client",
   "datasetSha256": "25364c90b666820a8e45c64164f294a407db3dc9d51fece02b4b5b4e08c495ed",
-  "implementationSha256": "a355601d5991da67c6b80d029868623c8ab57d2991dc80f9dcb37a7ca7a56bf6",
+  "implementationSha256": "f64070a6087f9b6a27c9630bac9d463b705175a664523f617f2d1237a7e756c4",
   "sourceFiles": [
     "src/retrieval/store.ts",
     "src/retrieval/findings.ts",
@@ -17,21 +17,21 @@
   "queryCount": 200,
   "starts": [
     {
-      "initializeMs": 77.13483300000001,
-      "initializeAndFirstSearchMs": 93.906
+      "initializeMs": 112.97166700000002,
+      "initializeAndFirstSearchMs": 132.963125
     },
     {
-      "initializeMs": 81.21487500000012,
-      "initializeAndFirstSearchMs": 87.02495900000031
+      "initializeMs": 98.56179199999951,
+      "initializeAndFirstSearchMs": 115.88858399999936
     },
     {
-      "initializeMs": 75.09237499999972,
-      "initializeAndFirstSearchMs": 80.79374999999982
+      "initializeMs": 82.90737499999977,
+      "initializeAndFirstSearchMs": 90.20754099999976
     }
   ],
   "warmCalls": 600,
-  "warmP50Ms": 3.563000000000102,
-  "warmP95Ms": 8.17337499999985,
+  "warmP50Ms": 6.357416999999941,
+  "warmP95Ms": 15.390916999999945,
   "maxResultBytes": 48334,
   "hitAt5": 0.76,
   "hitAt10": 0.8,

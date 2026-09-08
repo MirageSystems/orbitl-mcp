@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "datasetSha256": "135f53c9e36ace19ae3a35c5736f1b59d00a485caa95542e9a99d37b9e88638c",
+  "findings": [
+    {
+      "id": 1,
+      "source": "orbitl-synthetic-demo",
+      "title": "Synthetic example: accounting units",
+      "description": "This synthetic reference describes an accounting review question. The reviewer compares the units used for stored balances, conversions, and reported amounts. Applicability depends on the unit definitions and conversion boundaries in the current source. It is not a finding about a real project.",
+      "recommendation": "Document the unit at each accounting boundary and compare conversions with the intended invariant. Record missing evidence as unresolved.",
+      "severity": "Unknown",
+      "rawSeverity": "Synthetic example, unrated"
+    },
+    {
+      "id": 2,
+      "source": "orbitl-synthetic-demo",
+      "title": "Synthetic example: rounding policy",
+      "description": "This synthetic reference describes a rounding review question. The reviewer checks whether rounding direction is consistent with the stated accounting policy across relevant operations. It is not evidence that a current implementation is defective.",
+      "recommendation": "Identify the rounding policy and compare it with source evidence at each conversion. Explain any difference and its supported impact.",
+      "severity": "Unknown",
+      "rawSeverity": "Synthetic example, unrated"
+    },
+    {
+      "id": 3,
+      "source": "orbitl-synthetic-demo",
+      "title": "Synthetic example: configuration changes",
+      "description": "This synthetic reference describes a review of configuration updates. The reviewer identifies which roles may change a setting, when the change takes effect, and whether the documented preconditions still hold afterward. No real project was assessed for this example.",
+      "recommendation": "Compare the update rules with the intended roles and state transitions. Cite the current source for each conclusion.",
+      "severity": "Unknown",
+      "rawSeverity": "Synthetic example, unrated"
+    }
+  ]
+}
